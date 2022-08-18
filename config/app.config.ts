@@ -38,6 +38,6 @@ export const calculateArea = (data : CalculateArea) : number => {
 
 }
 
-export const calculateSquareFt = ({area = 0, perSquareFtRate} : {area : number , perSquareFtRate : number}) => {
+export const calculateSquareFt = ({area = 0, perSquareFtRate = 0} : {area : number , perSquareFtRate : number}) => {
   return area * perSquareFtRate
 }
