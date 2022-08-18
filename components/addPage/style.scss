@@ -105,6 +105,23 @@
                 @include flexBox();
             }
         }
+
+        .add__button {
+            width: fit-content;
+            border-radius: 50%;
+            background-color: $text_primary_color;
+            color: black;
+            width: 30px;
+            height: 30px;
+
+            @include flexBox(center, center);
+            border: 3px solid transparent;
+            transition: all ease-in 0.2s;
+
+            &:active {
+                border-color: $component_color2_blue;
+            }
+        }
     }
 }
 

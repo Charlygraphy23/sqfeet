@@ -7,12 +7,10 @@ const useEventHandler = (): [boolean, Dispatch<SetStateAction<boolean>>, RefObje
 
 
     const handleClick = useCallback((e: MouseEvent) => {
-
-
         // @ts-expect-error
         if (ref.current && e.target && !ref.current.contains(e.target)) setShow(false)
 
-    }, [])
+    }, [ref.current])
 
     useEffect(() => {
         document.addEventListener('click', handleClick);

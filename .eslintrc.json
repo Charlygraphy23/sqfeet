@@ -20,7 +20,8 @@
     "plugins": [
         "react",
         "@typescript-eslint",
-        "eslint-plugin-prettier"
+        "eslint-plugin-prettier",
+        "prettier"
     ],
     "rules": {
         "react/no-unescaped-entities": "off",
@@ -41,6 +42,7 @@
     "react/jsx-props-no-spreading": 0,
     "arrow-body-style": ["error", "as-needed"],
     "consistent-return": 0,
+    "no-underscore-dangle":0,
     "react/function-component-definition": [
       2,
       { "namedComponents": "arrow-function" }
@@ -57,7 +59,8 @@
         "quoteProps": "consistent",
         "jsxSingleQuote": true,
         "bracketSameLine": false,
-        "parser": "typescript"
+        "parser": "typescript",
+        "useTabs": false
       }
     ],
     "react/jsx-no-useless-fragment": 0,

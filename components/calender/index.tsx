@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import useEventHandler from 'hooks/useEventHandler'
 import { Calender } from 'interface'
 import moment, { Moment } from 'moment'
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react"
+import { Dispatch, memo, SetStateAction, useCallback, useLayoutEffect, useState } from "react"
 import CalenderBody from './components/CalenderBody'
 import CalenderController from './components/CalenderController'
 
@@ -17,9 +17,7 @@ type Props = {
 const Calender = ({ today, setToday }: Props) => {
 
 
-    const isMounted = useRef<boolean>(false)
-    const [start, setStart] = useState<Moment>()
-    const [end, setEnd] = useState<Moment>()
+
     const [calender, setCalender] = useState<Calender[]>([])
     const [show, setShow, ref] = useEventHandler()
 
@@ -39,15 +37,13 @@ const Calender = ({ today, setToday }: Props) => {
         }
         setCalender(_calender)
 
-        setStart(startDate)
-        setEnd(endDate)
     }, [today])
 
     const updateDate = useCallback((date: Moment) => {
         setToday(date)
     }, [])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
 
         const _time = setTimeout(() => {
 
@@ -83,4 +79,4 @@ const Calender = ({ today, setToday }: Props) => {
     )
 }
 
-export default Calender
+export default memo(Calender)

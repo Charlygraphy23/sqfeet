@@ -1,4 +1,5 @@
 import { Moment } from "moment";
+import { memo } from "react";
 
 type Props = {
     date: Moment;
@@ -22,4 +23,4 @@ const CalenderController = ({ date, updateDate }: Props) => {
     )
 }
 
-export default CalenderController
+export default memo(CalenderController)

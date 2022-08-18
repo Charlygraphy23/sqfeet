@@ -1,43 +1,50 @@
+/* eslint-disable no-unused-vars */
 export const CURRENCY = [
-    {
-      value: 'IND',
-      label: '₹',
-    }
-  ];
-  
+  {
+    value: 'IND',
+    label: '₹',
+  },
+];
 
-export enum AREAS{
-  SQUARE = "square",
-  RECTANGLE = "rectangle",
-  CIRCLE = "circle",
-  TRIANGLE = "triangle", 
+// eslint-disable-next-line no-shadow
+export enum AREAS {
+  SQUARE = 'square',
+  RECTANGLE = 'rectangle',
+  CIRCLE = 'circle',
+  TRIANGLE = 'triangle',
 }
 
 type CalculateArea = {
-  width?: number,
-  length?: number,
-  diameter?: number,
-  type: AREAS | string
-}
+  width?: number;
+  length?: number;
+  diameter?: number;
+  type: AREAS;
+};
 
-export const calculateArea = (data : CalculateArea) : number => {
+export const calculateArea = (data: CalculateArea) => {
+  const { type, width = 0, length = 0, diameter = 0 } = data;
 
-  const {type , width = 0 , length = 0 , diameter = 0 } = data
+  switch (type) {
+    case AREAS.RECTANGLE:
+      return width * length;
 
-  switch(type){
+    case AREAS.SQUARE:
+      return length * length;
+    case AREAS.CIRCLE:
+      return Math.PI * diameter * diameter;
 
-    case AREAS.RECTANGLE: return width * length
+    case AREAS.TRIANGLE:
+      return (0.5 * width * length).toFixed(2);
 
-    case AREAS.SQUARE: return length * length
-    case AREAS.CIRCLE: return Math.PI * diameter * diameter
-
-    case AREAS.TRIANGLE: (0.5 * width * length).toFixed(2)
-
-    default : return 0
+    default:
+      return 0;
   }
+};
 
-}
-
-export const calculateSquareFt = ({area = 0, perSquareFtRate = 0} : {area : number , perSquareFtRate : number}) => {
-  return area * perSquareFtRate
-}
+export const calculateTotal = ({
+  area = 0,
+  perSquareFtRate = 0,
+}: {
+  area: number;
+  perSquareFtRate: number;
+}) => area * perSquareFtRate;

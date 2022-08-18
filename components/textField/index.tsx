@@ -23,6 +23,7 @@ type Props = {
     onChange?: (e: any) => void
     type?: "text" | "number",
     id?: string,
+    name?: string,
     className?: string,
     prefix?: string,
     postfix?: string
@@ -32,7 +33,7 @@ type Props = {
 
 
 const TextFields = ({ type = "text", id = "", label = "", variant = "outlined", fullWidth = false,
-    select = false, value = "", onChange, currencies = CURRENCY, helperText = "", className = "", prefix = "", postfix = "", adornments = false, rows = 3, multiline = false, size }: Props) => {
+    select = false, value = "", onChange, currencies = CURRENCY, helperText = "", className = "", prefix = "", postfix = "", adornments = false, rows = 3, multiline = false, size, name = "" }: Props) => {
 
     const renderTextPrefix = useCallback(() => {
 
@@ -47,6 +48,7 @@ const TextFields = ({ type = "text", id = "", label = "", variant = "outlined", 
         return <FormControl className={className} fullWidth={fullWidth} >
             <InputLabel htmlFor={id}>{label}</InputLabel>
             <OutlinedInput
+                name={name}
                 type={type}
                 id={id}
                 value={value}
@@ -58,7 +60,7 @@ const TextFields = ({ type = "text", id = "", label = "", variant = "outlined", 
     }
 
     if (select) {
-        return <TextField type={type} className={className} id={id} label={label} variant={variant} fullWidth={fullWidth} select={select} value={value} onChange={onChange} helperText={helperText} size={size}>
+        return <TextField name={name} type={type} className={className} id={id} label={label} variant={variant} fullWidth={fullWidth} select={select} value={value} onChange={onChange} helperText={helperText} size={size}>
             {currencies.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                     {option.label}
@@ -69,6 +71,7 @@ const TextFields = ({ type = "text", id = "", label = "", variant = "outlined", 
 
     if (multiline) {
         return <TextField
+            name={name}
             type={type}
             multiline
             rows={rows}
@@ -77,7 +80,7 @@ const TextFields = ({ type = "text", id = "", label = "", variant = "outlined", 
         />
     }
 
-    return <TextField type={type} className={className} id={id} label={label} variant={variant} fullWidth={fullWidth} value={value} onChange={onChange} size={size} />
+    return <TextField name={name} type={type} className={className} id={id} label={label} variant={variant} fullWidth={fullWidth} value={value} onChange={onChange} size={size} />
 
 }
 

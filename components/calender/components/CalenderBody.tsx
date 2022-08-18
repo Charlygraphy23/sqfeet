@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { Calender } from "interface";
 import { Moment } from 'moment';
+import { memo } from "react";
 
 type Props = {
     calender: Calender[];
@@ -33,4 +34,4 @@ const CalenderBody = ({ calender, updateDate }: Props) => {
     )
 }
 
-export default CalenderBody
+export default memo(CalenderBody)

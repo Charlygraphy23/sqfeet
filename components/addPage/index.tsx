@@ -1,66 +1,121 @@
-import Calender from 'components/calender'
-import TextFields from 'components/textField'
-import { calculateArea, calculateSquareFt } from 'config/app.config'
-import { AddDataType } from 'interface'
-import moment from 'moment'
-import { ChangeEvent, useCallback, useState } from 'react'
-import AddDataComponent from './components/AddDataComponent'
+import { SelectChangeEvent } from '@mui/material';
+import Button from 'components/button';
+import Calender from 'components/calender';
+import TextFields from 'components/textField';
+import { AREAS, calculateArea, calculateTotal } from 'config/app.config';
+import { AddDataType } from 'interface';
+import moment from 'moment';
+import { ChangeEvent, useCallback, useState } from 'react';
+import AddDataComponent from './components/AddDataComponent';
 
 const AddPageContainer = () => {
+  const [date, setDate] = useState(moment().clone());
+  const [data, setData] = useState<AddDataType[]>([
+    {
+      title: '',
+      description: '',
+      type: AREAS.RECTANGLE,
+    },
+  ]);
+  const [perSquareFtRate, setPerSquareFtRate] = useState(0);
 
-  const [date, setDate] = useState(moment().clone())
-  const [data, setData] = useState<AddDataType[]>([])
-  const [perSquareFtRate, setPerSquareFtRate] = useState(0)
+  const calculateSquareFt = useCallback(
+    (_data: AddDataType[], i: number, psft?: number) => {
+      let currentVal = { ..._data[i] };
 
+      const _cal = {
+        ...currentVal,
+        type: currentVal?.type || AREAS.RECTANGLE,
+      };
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, i: number) => {
+      const area = calculateArea(_cal);
+      const total = calculateTotal({
+        area: +area,
+        perSquareFtRate: psft ?? perSquareFtRate,
+      });
 
+      currentVal = {
+        ...currentVal,
+        sq: +area,
+        total,
+      };
 
-    let _data = Array.from(data);
+      // eslint-disable-next-line no-param-reassign
+      _data[i] = { ...currentVal };
 
-    const _cal = {
-      type: _data[i]?.type || "",
-      width: _data[i]?.width ?? 0,
-      length: _data[i]?.length ?? 0,
-      diameter: _data[i]?.diameter ?? 0
-    }
+      return _data;
+    },
+    [perSquareFtRate]
+  );
 
-    const area = calculateArea(_cal)
-    const sqaureFt = calculateSquareFt({ area, perSquareFtRate })
+  const handleChange = useCallback(
+    (
+      e:
+        | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        | SelectChangeEvent<AREAS>,
+      i: number
+    ) => {
+      const _data = Array.from(data);
 
-    _data[i] = {
-      ..._data[i],
-      sq: area,
-      [e.target.id]: e.target.value
-    }
+      _data[i] = {
+        ..._data[i],
+        [e.target.name]: e.target.value,
+      };
 
+      setData(calculateSquareFt(_data, i));
+    },
+    [calculateSquareFt, data]
+  );
 
-    setData(_data)
+  const handleSquareFtRateChange = useCallback(
+    (e: any) => {
+      const _data = Array.from(data);
+      const _perSquareFtRate = e.target.value;
+      setPerSquareFtRate(_perSquareFtRate);
+      let tempData = [] as AddDataType[];
 
+      _data.forEach((_, i) => {
+        tempData = calculateSquareFt(_data, i, _perSquareFtRate);
+      });
 
-  }, [data, perSquareFtRate])
+      setData(tempData);
+    },
+    [calculateSquareFt, data]
+  );
 
   return (
-    <div className="addPage__container">
+    <div className='addPage__container'>
+      <h1 className='page_title mt-3'>Add Data</h1>
 
-      <h1 className="page_title mt-3">Add Data</h1>
-
-      <div className="calender__chooser">
+      <div className='calender__chooser'>
         <p>Choose Date :</p>
 
-
-        <div><Calender setToday={setDate} today={date} /></div>
+        <div>
+          <Calender setToday={setDate} today={date} />
+        </div>
       </div>
 
-
-      <div className="customTextField mt-1">
-        <TextFields fullWidth label="Rate per sqft" adornments prefix='₹' value={perSquareFtRate} onChange={e => setPerSquareFtRate(e.target.value)} />
+      <div className='customTextField mt-1'>
+        <TextFields
+          type='number'
+          fullWidth
+          label='Rate per sqft'
+          adornments
+          prefix='₹'
+          value={perSquareFtRate}
+          onChange={handleSquareFtRateChange}
+        />
       </div>
 
-      <AddDataComponent data={data} setData={setData} />
+      <div className='d-flex justify-content-end align-items-center mt-1 mb-2'>
+        <Button className='add__button'>
+          <i className='bi bi-plus' />
+        </Button>
+      </div>
 
+      <AddDataComponent data={data} handleChange={handleChange} />
     </div>
-  )
-}
+  );
+};
 
-export default AddPageContainer
+export default AddPageContainer;
