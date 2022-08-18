@@ -1,0 +1,81 @@
+@import "./methods.scss";
+@import "./veriables.scss";
+
+// components
+@import "../components/style.scss";
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+  background-color: $theme_dark_color;
+}
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  width: 100%;
+  max-width: $max-width;
+  margin: auto;
+  position: relative;
+}
+
+.button {
+  background-color: gray;
+  overflow: hidden;
+  width: 100%;
+
+  .button__loader {
+    width: 100% !important;
+  }
+
+  button {
+    margin: 0;
+    position: relative;
+    width: inherit;
+    border: none;
+    outline: none;
+    padding: 5px;
+    font-size: inherit;
+    color: inherit;
+    background-color: inherit;
+    background: inherit;
+
+    &:disabled {
+      opacity: 0.8;
+    }
+  }
+}
+
+.page_title {
+  margin: 1rem 0.5rem;
+  font-size: 3rem;
+  font-weight: bold;
+
+  position: relative;
+  width: fit-content;
+  z-index: 1;
+
+  &:after {
+    z-index: -1;
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 70%;
+    width: 0%;
+    height: 10px;
+    background: $component_color1;
+    animation: borderAnimation 0.8s ease-in forwards;
+  }
+}
+
+@keyframes borderAnimation {
+  0% {
+    width: 0%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}

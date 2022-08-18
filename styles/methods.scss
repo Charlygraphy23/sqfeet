@@ -1,0 +1,39 @@
+$margins: 1, 2, 3, 4, 5, 6, 7;
+
+@each $margin in $margins {
+    .m-#{$margin} {
+        margin: #{$margin}rem !important;
+    }
+    .ml-#{$margin} {
+        margin-left: #{$margin}rem !important;
+    }
+
+    .mr-#{$margin} {
+        margin-right: #{$margin}rem !important;
+    }
+
+    .mt-#{$margin} {
+        margin-top: #{$margin}rem !important;
+    }
+
+    .mb-#{$margin} {
+        margin-bottom: #{$margin}rem !important;
+    }
+
+    .mx-#{$margin} {
+        margin-left: #{$margin}rem !important;
+        margin-right: #{$margin}rem !important;
+    }
+
+    .my-#{$margin} {
+        margin-top: #{$margin}rem !important;
+        margin-bottom: #{$margin}rem !important;
+    }
+}
+
+@mixin flexBox($justify: flex-start, $align: flex-start, $direction: row) {
+    display: flex;
+    justify-content: $justify;
+    align-items: $align;
+    flex-direction: $direction;
+}

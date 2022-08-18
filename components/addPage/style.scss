@@ -1,0 +1,119 @@
+.addPage {
+    color: $text_primary_color;
+    padding-bottom: $padding_bottom;
+
+    .addPage__container {
+        padding: 10px;
+
+        .page_title:after {
+            background-color: $component_color2_blue;
+        }
+
+        .calender__chooser {
+            padding: 1.5rem 1rem;
+            margin-top: 3rem;
+            border-radius: 10px;
+            background-color: rgba(white, 0.08);
+            @include flexBox(space-between, center);
+
+            // backdrop-filter: saturate(180%) blur(10px);
+            border: 2px solid transparent;
+            transition: 0.2s ease-in border;
+
+            &:hover {
+                border-color: $text_primary_color;
+            }
+
+            & > p {
+                margin: 0;
+                font-weight: bold;
+            }
+        }
+
+        .customTextField {
+            .MuiFormControl-root {
+                label {
+                    color: white;
+                    &.Mui-focused {
+                        color: $component_color3_green;
+                    }
+                }
+
+                .MuiOutlinedInput-root {
+                    color: white;
+
+                    svg {
+                        fill: white;
+                    }
+
+                    &.Mui-focused {
+                        .MuiOutlinedInput-notchedOutline {
+                            border-color: $component_color3_green;
+                        }
+
+                        .MuiInputAdornment-root {
+                            p {
+                                color: $component_color3_green;
+                            }
+                        }
+                    }
+
+                    .MuiOutlinedInput-notchedOutline {
+                        border-color: rgba(white, 0.1);
+                    }
+                    .MuiInputAdornment-root {
+                        p {
+                            color: white;
+                        }
+                    }
+                }
+
+                .MuiFormHelperText-root {
+                    color: white;
+                }
+            }
+        }
+
+        .accordion {
+            margin-top: 1rem;
+
+            .accordion__title {
+                margin: 0;
+                font-weight: bold;
+                margin-left: 5px;
+
+                @include flexBox(center, center);
+            }
+
+            .accordion__header {
+                position: relative;
+
+                .close {
+                    position: absolute;
+                    top: -15px;
+                    right: -10px;
+                    z-index: 2;
+                    color: $red;
+                }
+
+                .MuiTextField-root {
+                    max-width: 120px;
+                }
+            }
+
+            .accordion__body {
+                @include flexBox();
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .addPage {
+        .addPage__container {
+            .calender__chooser {
+                font-size: 0.8rem;
+            }
+        }
+    }
+}

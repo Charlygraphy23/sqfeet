@@ -1,0 +1,122 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    padding: 10px 2rem;
+    max-width: $max-width;
+    background-color: $theme_dark_color;
+    margin-bottom: 0;
+    padding: 2rem 0rem;
+    border-top-left-radius: 35px;
+    border-top-right-radius: 35px;
+
+    @include flexBox(space-around);
+
+    li {
+        list-style: none;
+
+        .fl__link {
+            color: $text_primary_color;
+            font-size: 1.4rem;
+            position: relative;
+
+            display: block;
+            margin-right: 5px;
+
+            &.main {
+                background: $text_primary_color;
+                border-radius: 50%;
+                width: 3rem;
+                height: 3rem;
+                @include flexBox(center, center, center);
+                margin-top: -10px;
+                font-size: 2.5rem;
+                padding-top: 2px;
+
+                background-color: $text_primary_color;
+                color: $component_color1;
+
+                &.active {
+                    background-color: $component_color1;
+                    color: $text_primary_color;
+                    font-size: 1.8rem;
+                }
+            }
+
+            &:not(.main):after {
+                content: "";
+                position: absolute;
+                left: 0;
+                bottom: 0px;
+                height: 2px;
+                width: 0;
+                background-color: $text_primary_color;
+                pointer-events: none;
+                opacity: 0;
+            }
+
+            &.active {
+                color: $component_color1;
+                filter: drop-shadow(0px 0px 10px rgba($component_color1, 1));
+                animation: zoomClick 0.4s ease-out forwards;
+
+                &:not(.main) {
+                    margin-top: -5px;
+                }
+
+                &:not(.main):after {
+                    width: 100%;
+                    opacity: 1;
+                    animation: widthExpand 0.5s ease-in forwards;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .footer {
+        padding: 1rem 0rem;
+
+        li {
+            .fl__link {
+                &.main {
+                    width: 2rem;
+                    height: 2rem;
+                    font-size: 1.5rem;
+                    margin-top: -5px;
+
+                    &.active {
+                        font-size: 1.3rem;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@keyframes zoomClick {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes widthExpand {
+    0% {
+        width: 0;
+    }
+
+    100% {
+        transform: 100%;
+    }
+}
