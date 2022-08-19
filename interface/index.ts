@@ -16,5 +16,6 @@ export type AddDataType = {
     
     total?: number;
     sq?: number;
-    type?: AREAS
+    type?: AREAS,
+    errors?: any
 }

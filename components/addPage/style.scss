@@ -122,6 +122,23 @@
                 border-color: $component_color2_blue;
             }
         }
+
+        .submit__button {
+            width: fit-content;
+            border-radius: 50%;
+            background-color: $component_color3_green;
+            color: white;
+            width: 30px;
+            height: 30px;
+
+            @include flexBox(center, center);
+            border: 3px solid transparent;
+            transition: all ease-in 0.2s;
+
+            &:not(:disabled):active {
+                border-color: $text_primary_color;
+            }
+        }
     }
 }
 

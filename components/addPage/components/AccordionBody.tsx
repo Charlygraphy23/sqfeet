@@ -42,6 +42,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             label='Width in ft'
                             value={value?.width}
                             onChange={(e) => handleChange(e, i)}
+                            error={!!value.errors?.width}
+                            helperText={value.errors?.width}
                         />
                         <TextFields
                             type='number'
@@ -52,6 +54,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             value={value?.length}
                             name='length'
                             onChange={(e) => handleChange(e, i)}
+                            error={!!value.errors?.length}
+                            helperText={value.errors?.length}
                         />
                     </>
                 );
@@ -67,6 +71,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                         value={value?.length}
                         name='length'
                         onChange={(e) => handleChange(e, i)}
+                        error={!!value.errors?.length}
+                        helperText={value.errors?.length}
                     />
                 );
 
@@ -81,6 +87,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                         value={value?.diameter}
                         name='diameter'
                         onChange={(e) => handleChange(e, i)}
+                        error={!!value.errors?.diameter}
+                        helperText={value.errors?.diameter}
                     />
                 );
 
@@ -96,6 +104,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             value={value?.width}
                             name='width'
                             onChange={(e) => handleChange(e, i)}
+                            error={!!value.errors?.width}
+                            helperText={value.errors?.width}
                         />
                         <TextFields
                             type='number'
@@ -106,6 +116,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             value={value?.length}
                             name='length'
                             onChange={(e) => handleChange(e, i)}
+                            error={!!value.errors?.length}
+                            helperText={value.errors?.length}
                         />
                     </>
                 );
@@ -113,7 +125,7 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
             default:
                 return 'Error';
         }
-    }, [value?.type, value?.width, value?.length, value?.diameter, handleChange, i]);
+    }, [value?.type, value?.width, value.errors?.width, value.errors?.length, value.errors?.diameter, value?.length, value?.diameter, handleChange, i]);
 
     return (
         <div className='w-100'>
@@ -144,6 +156,7 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                 value={value?.description}
                 name='description'
                 onChange={(e) => handleChange(e, i)}
+
             />
 
             {renderTextFieldsDependingOnAreas()}

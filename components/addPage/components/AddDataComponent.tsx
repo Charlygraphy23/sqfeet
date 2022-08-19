@@ -22,21 +22,22 @@ type Props = {
             | SelectChangeEvent<AREAS>,
         i: number
     ) => void;
+    handleClose: (index: number) => void
 };
 
-const AddDataComponent = ({ data, handleChange }: Props) => (
+const AddDataComponent = ({ data, handleChange, handleClose }: Props) => (
     <div className='addData'>
-        <div className='addPage__container mt-2'>
+        <div className='addPage__container mt-1'>
             <div className='accordion '>
                 {data?.map((value, i) => (
-                    <Accordion key={i}>
+                    <Accordion key={i} className='mb-1'>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
                             aria-controls='panel1a-content'
                             id='panel1a-header'
                             className='accordion__header'
                         >
-                            <i className='bi bi-x-circle-fill close' />
+                            <i className='bi bi-x-circle-fill close' onClick={() => handleClose(i)} />
 
                             <TextFields
                                 name='title'
@@ -44,6 +45,8 @@ const AddDataComponent = ({ data, handleChange }: Props) => (
                                 label='Title'
                                 value={value.title}
                                 onChange={(e) => handleChange(e, i)}
+                                error={!!value.errors?.title}
+                                helperText={value.errors?.title}
                             />
                             <p className='accordion__title'>| (₹) {value?.total?.toFixed(2) || '--'}</p>
                         </AccordionSummary>
