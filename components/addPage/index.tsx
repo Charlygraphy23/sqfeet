@@ -5,19 +5,25 @@ import TextFields from 'components/textField';
 import { AREAS, calculateArea, calculateTotal } from 'config/app.config';
 import { AddDataType } from 'interface';
 import moment from 'moment';
-import { ChangeEvent, useCallback, useState } from 'react';
+import { ChangeEvent, useCallback, useMemo, useState } from 'react';
+import validator from 'validator';
 import AddDataComponent from './components/AddDataComponent';
 
 const AddPageContainer = () => {
   const [date, setDate] = useState(moment().clone());
-  const [data, setData] = useState<AddDataType[]>([
-    {
+  const initialState = useMemo(
+    () => ({
       title: '',
       description: '',
       type: AREAS.RECTANGLE,
+      length: '' as any,
+      width: '' as any,
+      diameter: '' as any,
       errors: {},
-    },
-  ]);
+    }),
+    []
+  );
+  const [data, setData] = useState<AddDataType[]>([initialState]);
   const [perSquareFtRate, setPerSquareFtRate] = useState(0);
 
   const calculateSquareFt = useCallback(
@@ -58,6 +64,13 @@ const AddPageContainer = () => {
     ) => {
       const _data = Array.from(data);
 
+      if (e.target.name === 'type') {
+        _data[i] = {
+          ..._data[i],
+          errors: {},
+        };
+      }
+
       _data[i] = {
         ..._data[i],
         [e.target.name]: e.target.value,
@@ -85,53 +98,67 @@ const AddPageContainer = () => {
   );
 
   const handleAdd = useCallback(() => {
-    setData((prevState) => [
-      ...prevState,
-      {
-        title: '',
-        description: '',
-        type: AREAS.RECTANGLE,
-        errors: {},
-      },
-    ]);
-  }, []);
+    setData((prevState) => [...prevState, initialState]);
+  }, [initialState]);
 
   const handleClose = useCallback((index: number) => {
     setData((prevState) => prevState.filter((_, i) => i !== index));
   }, []);
 
   const checkValidation = useCallback(() => {
-    const flag = false;
+    let flag = false;
 
     // ? Reset all Previous Errors
-    setData((prevState) => [
-      ...prevState.map((_val) => ({ ..._val, errors: {} })),
-    ]);
+    setData(data.map((_val) => ({ ..._val, errors: {} })));
 
     const _data = Array.from(data);
 
     // ? Find if any other error happens and set them to Data
-    // setData(
-    //   _data.map((value) => {
-    //     const _value = { ...value };
+    setData(
+      _data.map((value) => {
+        const _value: AddDataType = { ...value };
 
-    //     Object.keys(newAddDataType).forEach((key) => {
-    //       // @ts-expect-error
-    //       const currentVal = _value[key];
-    //       if (!['errors', 'description'].includes(key)) {
-    //         if (validator.isEmpty(currentVal)) {
-    //           flag = true;
-    //           _value.errors = {
-    //             ..._value.errors,
-    //             [key]: 'Required',
-    //           };
-    //         }
-    //       }
-    //     });
+        Object.keys(_value).forEach((key) => {
+          if (!['errors', 'description', 'type'].includes(key)) {
+            if (
+              [AREAS.RECTANGLE, AREAS.TRIANGLE].includes(
+                _value?.type ?? AREAS.RECTANGLE
+              ) &&
+              !['diameter'].includes(key) &&
+              validator.isEmpty(_value[key].toString())
+            ) {
+              flag = true;
+              _value.errors = {
+                ..._value.errors,
+                [key]: 'Required',
+              };
+            } else if (
+              [AREAS.SQUARE].includes(_value?.type ?? AREAS.RECTANGLE) &&
+              !['diameter', 'width'].includes(key) &&
+              validator.isEmpty(_value[key].toString())
+            ) {
+              flag = true;
+              _value.errors = {
+                ..._value.errors,
+                [key]: 'Required',
+              };
+            } else if (
+              [AREAS.CIRCLE].includes(_value?.type ?? AREAS.RECTANGLE) &&
+              !['width', 'length'].includes(key) &&
+              validator.isEmpty(_value[key].toString())
+            ) {
+              flag = true;
+              _value.errors = {
+                ..._value.errors,
+                [key]: 'Required',
+              };
+            }
+          }
+        });
 
-    //     return _value;
-    //   })
-    // );
+        return _value;
+      })
+    );
 
     return flag;
   }, [data]);
