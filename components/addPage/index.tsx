@@ -23,8 +23,30 @@ const AddPageContainer = () => {
     }),
     []
   );
-  const [data, setData] = useState<AddDataType[]>([initialState]);
+  const [data, setData] = useState<AddDataType[]>([]);
   const [perSquareFtRate, setPerSquareFtRate] = useState(0);
+  const [perSquareFtRateError, setPerSquareFtRateError] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0.0);
+  const [totalSquareFt, setTotalSquareFt] = useState(0.0);
+
+  const calculateTotalOverall = useCallback((_data: AddDataType[]) => {
+    const { price = 0, sqft = 0 } = _data.reduce(
+      (prevState, currState: any) => {
+        if (currState.sq || currState.total) {
+          return {
+            price: prevState.price + (currState.total || 0),
+            sqft: prevState.sqft + (currState.sq || 0),
+          };
+        }
+
+        return prevState;
+      },
+      { price: 0, sqft: 0 }
+    );
+
+    setTotalPrice(price);
+    setTotalSquareFt(sqft);
+  }, []);
 
   const calculateSquareFt = useCallback(
     (_data: AddDataType[], i: number, psft?: number) => {
@@ -76,9 +98,11 @@ const AddPageContainer = () => {
         [e.target.name]: e.target.value,
       };
 
-      setData(calculateSquareFt(_data, i));
+      const tempData = calculateSquareFt(_data, i);
+      calculateTotalOverall(tempData);
+      setData(tempData);
     },
-    [calculateSquareFt, data]
+    [calculateSquareFt, calculateTotalOverall, data]
   );
 
   const handleSquareFtRateChange = useCallback(
@@ -92,9 +116,10 @@ const AddPageContainer = () => {
         tempData = calculateSquareFt(_data, i, _perSquareFtRate);
       });
 
+      calculateTotalOverall(tempData);
       setData(tempData);
     },
-    [calculateSquareFt, data]
+    [calculateSquareFt, calculateTotalOverall, data]
   );
 
   const handleAdd = useCallback(() => {
@@ -107,11 +132,9 @@ const AddPageContainer = () => {
 
   const checkValidation = useCallback(() => {
     let flag = false;
+    let _data = Array.from(data);
 
-    // ? Reset all Previous Errors
-    setData(data.map((_val) => ({ ..._val, errors: {} })));
-
-    const _data = Array.from(data);
+    _data = _data.map((val) => ({ ...val, errors: {} }));
 
     // ? Find if any other error happens and set them to Data
     setData(
@@ -165,9 +188,11 @@ const AddPageContainer = () => {
 
   const handleSubmit = useCallback(() => {
     const hasError = checkValidation();
+    setPerSquareFtRateError(false);
+    if (!perSquareFtRate) setPerSquareFtRateError(true);
 
     console.log('hasError', hasError);
-  }, [checkValidation]);
+  }, [checkValidation, perSquareFtRate]);
 
   return (
     <div className='addPage__container'>
@@ -188,19 +213,41 @@ const AddPageContainer = () => {
           label='Rate per sqft'
           adornments
           prefix='₹'
+          error={perSquareFtRateError}
           value={perSquareFtRate}
           onChange={handleSquareFtRateChange}
+          helperText='Required'
         />
       </div>
 
+      <table style={{ marginLeft: 'auto' }} className='mt-1'>
+        <tbody>
+          <tr>
+            <td>Total (₹) : </td>
+            <td>{` ${totalPrice.toFixed(2)}`}</td>
+          </tr>
+
+          <tr>
+            <td>
+              Total ft<sup>2</sup> :
+            </td>
+            <td>{totalSquareFt}</td>
+          </tr>
+        </tbody>
+      </table>
+
       <div className='d-flex justify-content-between align-items-center mt-2 mb-1 px-1'>
-        <Button
-          className='submit__button'
-          disabled={!data.length}
-          onClick={handleSubmit}
-        >
-          <i className='bi bi-check-lg' />
-        </Button>
+        {data.length ? (
+          <Button
+            className='submit__button'
+            disabled={!data.length}
+            onClick={handleSubmit}
+          >
+            <i className='bi bi-check-lg' />
+          </Button>
+        ) : (
+          <div />
+        )}
         <Button className='add__button' onClick={handleAdd}>
           <i className='bi bi-plus' />
         </Button>

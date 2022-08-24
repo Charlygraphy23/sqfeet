@@ -70,6 +70,10 @@ body {
   }
 }
 
+#nprogress .bar {
+  background: $component_color3_green !important;
+}
+
 @keyframes borderAnimation {
   0% {
     width: 0%;
@@ -77,5 +81,11 @@ body {
 
   100% {
     width: 100%;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .page_title {
+    font-size: 2.5rem;
   }
 }

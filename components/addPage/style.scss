@@ -42,6 +42,24 @@
                 .MuiOutlinedInput-root {
                     color: white;
 
+                    &:not(.Mui-focused).Mui-error {
+                        color: $mui_error;
+
+                        svg {
+                            fill: $mui_error;
+                        }
+
+                        .MuiOutlinedInput-notchedOutline {
+                            border-color: $mui_error;
+                        }
+
+                        .MuiInputAdornment-root {
+                            p {
+                                color: $mui_error;
+                            }
+                        }
+                    }
+
                     svg {
                         fill: white;
                     }
@@ -138,6 +156,61 @@
             &:not(:disabled):active {
                 border-color: $text_primary_color;
             }
+        }
+    }
+}
+
+.addProject {
+    color: $text_primary_color;
+    padding-bottom: $padding_bottom;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    .create__project {
+        width: fit-content;
+        border-radius: 8px;
+        background: $component_color2_blue;
+    }
+
+    .MuiFormControl-root {
+        label {
+            color: white;
+            &.Mui-focused {
+                color: $component_color2_blue;
+            }
+        }
+
+        .MuiOutlinedInput-root {
+            color: white;
+
+            svg {
+                fill: white;
+            }
+
+            &.Mui-focused {
+                .MuiOutlinedInput-notchedOutline {
+                    border-color: $component_color2_blue;
+                }
+
+                .MuiInputAdornment-root {
+                    p {
+                        color: $component_color2_blue;
+                    }
+                }
+            }
+
+            .MuiOutlinedInput-notchedOutline {
+                border-color: rgba(white, 0.1);
+            }
+            .MuiInputAdornment-root {
+                p {
+                    color: white;
+                }
+            }
+        }
+
+        .MuiFormHelperText-root {
+            color: white;
         }
     }
 }
