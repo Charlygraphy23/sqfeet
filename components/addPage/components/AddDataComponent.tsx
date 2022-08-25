@@ -23,9 +23,11 @@ type Props = {
         i: number
     ) => void;
     handleClose: (index: number) => void
+    // eslint-disable-next-line react/require-default-props
+    readOnly?: boolean
 };
 
-const AddDataComponent = ({ data, handleChange, handleClose }: Props) => (
+const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false }: Props) => (
     <div className='addData'>
         <div className='addPage__container mt-1'>
             <div className='accordion '>
@@ -37,17 +39,21 @@ const AddDataComponent = ({ data, handleChange, handleClose }: Props) => (
                             id='panel1a-header'
                             className='accordion__header'
                         >
-                            <i className='bi bi-x-circle-fill close' onClick={() => handleClose(i)} />
+                            {!readOnly && <i className='bi bi-x-circle-fill close' onClick={() => handleClose(i)} />}
 
-                            <TextFields
-                                name='title'
-                                size='small'
-                                label='Title'
-                                value={value.title}
-                                onChange={(e) => handleChange(e, i)}
-                                error={!!value.errors?.title}
-                                helperText={value.errors?.title}
-                            />
+                            {readOnly ?
+                                <p className='accordion__title'> {value.title || '--'}</p>
+
+                                : <TextFields
+                                    name='title'
+                                    size='small'
+                                    label='Title'
+                                    value={value.title}
+                                    onChange={(e) => handleChange(e, i)}
+                                    error={!!value.errors?.title}
+                                    helperText={value.errors?.title}
+                                />}
+
                             <p className='accordion__title'>| (₹) {value?.total?.toFixed(2) || '--'}</p>
                         </AccordionSummary>
                         <AccordionDetails>
@@ -56,6 +62,7 @@ const AddDataComponent = ({ data, handleChange, handleClose }: Props) => (
                                     value={value}
                                     index={i}
                                     handleChange={handleChange}
+                                    readOnly={readOnly}
                                 />
                             </div>
                         </AccordionDetails>

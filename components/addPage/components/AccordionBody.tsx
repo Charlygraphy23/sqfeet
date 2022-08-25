@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
 
@@ -13,6 +14,7 @@ import TextFields from 'components/textField';
 import { AREAS } from 'config/app.config';
 import { AddDataType } from 'interface';
 import { ChangeEvent, useCallback } from 'react';
+import ViewOnlyFields from './ViewOnlyFields';
 
 type Props = {
     value: AddDataType;
@@ -23,9 +25,11 @@ type Props = {
             | SelectChangeEvent<AREAS>,
         i: number
     ) => void;
+    // eslint-disable-next-line react/require-default-props
+    readOnly?: boolean
 };
 
-const AccordionBody = ({ value, index: i, handleChange }: Props) => {
+const AccordionBody = ({ value, index: i, handleChange, readOnly = false }: Props) => {
     const renderTextFieldsDependingOnAreas = useCallback(() => {
         if (!value?.type) return 'Error';
 
@@ -33,7 +37,7 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
             case AREAS.RECTANGLE:
                 return (
                     <>
-                        <TextFields
+                        {readOnly ? <ViewOnlyFields label='Width in ft' value={value?.width} /> : <TextFields
                             type='number'
                             name='width'
                             size='small'
@@ -44,8 +48,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.width}
                             helperText={value.errors?.width}
-                        />
-                        <TextFields
+                        />}
+                        {readOnly ? <ViewOnlyFields label='Length in ft' value={value?.length} /> : <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -56,46 +60,50 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.length}
                             helperText={value.errors?.length}
-                        />
+                        />}
                     </>
                 );
 
             case AREAS.SQUARE:
                 return (
-                    <TextFields
-                        type='number'
-                        size='small'
-                        className='mb-1'
-                        fullWidth
-                        label='Side Length in ft'
-                        value={value?.length}
-                        name='length'
-                        onChange={(e) => handleChange(e, i)}
-                        error={!!value.errors?.length}
-                        helperText={value.errors?.length}
-                    />
+                    <>
+                        {readOnly ? <ViewOnlyFields label='Side Length in ft' value={value?.length} /> : <TextFields
+                            type='number'
+                            size='small'
+                            className='mb-1'
+                            fullWidth
+                            label='Side Length in ft'
+                            value={value?.length}
+                            name='length'
+                            onChange={(e) => handleChange(e, i)}
+                            error={!!value.errors?.length}
+                            helperText={value.errors?.length}
+                        />}
+                    </>
                 );
 
             case AREAS.CIRCLE:
                 return (
-                    <TextFields
-                        type='number'
-                        size='small'
-                        className='mb-1'
-                        fullWidth
-                        label='Diameter'
-                        value={value?.diameter}
-                        name='diameter'
-                        onChange={(e) => handleChange(e, i)}
-                        error={!!value.errors?.diameter}
-                        helperText={value.errors?.diameter}
-                    />
+                    <>
+                        {readOnly ? <ViewOnlyFields label='Diameter' value={value?.diameter} /> : <TextFields
+                            type='number'
+                            size='small'
+                            className='mb-1'
+                            fullWidth
+                            label='Diameter'
+                            value={value?.diameter}
+                            name='diameter'
+                            onChange={(e) => handleChange(e, i)}
+                            error={!!value.errors?.diameter}
+                            helperText={value.errors?.diameter}
+                        />}
+                    </>
                 );
 
             case AREAS.TRIANGLE:
                 return (
                     <>
-                        <TextFields
+                        {readOnly ? <ViewOnlyFields label='Base in ft' value={value?.width} /> : <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -106,8 +114,8 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.width}
                             helperText={value.errors?.width}
-                        />
-                        <TextFields
+                        />}
+                        {readOnly ? <ViewOnlyFields label='Length in ft' value={value?.length} /> : <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -118,35 +126,37 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.length}
                             helperText={value.errors?.length}
-                        />
+                        />}
                     </>
                 );
 
             default:
                 return 'Error';
         }
-    }, [value?.type, value?.width, value.errors?.width, value.errors?.length, value.errors?.diameter, value?.length, value?.diameter, handleChange, i]);
+    }, [value?.type, value?.width, value.errors?.width, value.errors?.length, value.errors?.diameter, value?.length, value?.diameter, readOnly, handleChange, i]);
 
     return (
         <div className='w-100'>
-            <FormControl fullWidth className='mb-1'>
-                <InputLabel id='demo-simple-select-helper-label'>Areas</InputLabel>
-                <Select
-                    labelId='demo-simple-select-helper-label'
-                    id='demo-simple-select-helper-label'
-                    name='type'
-                    value={value?.type}
-                    label='Age'
-                    onChange={(e) => handleChange(e, i)}
-                >
-                    <MenuItem value={AREAS.SQUARE}>Square</MenuItem>
-                    <MenuItem value={AREAS.RECTANGLE}>Rectangle</MenuItem>
-                    <MenuItem value={AREAS.CIRCLE}>Circle</MenuItem>
-                    <MenuItem value={AREAS.TRIANGLE}>Triangle</MenuItem>
-                </Select>
-                <FormHelperText>Select Areas</FormHelperText>
-            </FormControl>
-            <TextFields
+            {readOnly ?
+                <ViewOnlyFields label='Areas' value={value?.type} />
+                : <FormControl fullWidth className='mb-1'>
+                    <InputLabel id='demo-simple-select-helper-label'>Areas</InputLabel>
+                    <Select
+                        labelId='demo-simple-select-helper-label'
+                        id='demo-simple-select-helper-label'
+                        name='type'
+                        value={value?.type}
+                        label='Areas'
+                        onChange={(e) => handleChange(e, i)}
+                    >
+                        <MenuItem value={AREAS.SQUARE}>Square</MenuItem>
+                        <MenuItem value={AREAS.RECTANGLE}>Rectangle</MenuItem>
+                        <MenuItem value={AREAS.CIRCLE}>Circle</MenuItem>
+                        <MenuItem value={AREAS.TRIANGLE}>Triangle</MenuItem>
+                    </Select>
+                    <FormHelperText>Select Areas</FormHelperText>
+                </FormControl>}
+            {readOnly ? <ViewOnlyFields label='Description' value={value?.description} /> : <TextFields
                 size='small'
                 className='mb-1'
                 fullWidth
@@ -157,7 +167,7 @@ const AccordionBody = ({ value, index: i, handleChange }: Props) => {
                 name='description'
                 onChange={(e) => handleChange(e, i)}
 
-            />
+            />}
 
             {renderTextFieldsDependingOnAreas()}
 

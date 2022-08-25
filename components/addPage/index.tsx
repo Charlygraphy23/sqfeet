@@ -9,7 +9,12 @@ import { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import validator from 'validator';
 import AddDataComponent from './components/AddDataComponent';
 
-const AddPageContainer = () => {
+type Props = {
+  // eslint-disable-next-line react/require-default-props
+  readOnly?: boolean;
+};
+
+const AddPageContainer = ({ readOnly = false }: Props) => {
   const [date, setDate] = useState(moment().clone());
   const initialState = useMemo(
     () => ({
@@ -196,32 +201,39 @@ const AddPageContainer = () => {
 
   return (
     <div className='addPage__container'>
-      <h1 className='page_title mt-3'>Add Data</h1>
-
       <div className='calender__chooser'>
         <p>Choose Date :</p>
 
         <div>
-          <Calender setToday={setDate} today={date} />
+          <Calender setToday={setDate} today={date} readOnly={readOnly} />
         </div>
       </div>
 
-      <div className='customTextField mt-1'>
-        <TextFields
-          type='number'
-          fullWidth
-          label='Rate per sqft'
-          adornments
-          prefix='₹'
-          error={perSquareFtRateError}
-          value={perSquareFtRate}
-          onChange={handleSquareFtRateChange}
-          helperText='Required'
-        />
-      </div>
+      {!readOnly && (
+        <div className='customTextField mt-1'>
+          <TextFields
+            type='number'
+            fullWidth
+            label='Rate per sqft'
+            adornments
+            prefix='₹'
+            error={perSquareFtRateError}
+            value={perSquareFtRate}
+            onChange={handleSquareFtRateChange}
+            helperText='Required'
+          />
+        </div>
+      )}
 
       <table style={{ marginLeft: 'auto' }} className='mt-1'>
         <tbody>
+          {readOnly && (
+            <tr>
+              <td>Rate per sqft (₹) : </td>
+              <td>{` ${perSquareFtRate}`}</td>
+            </tr>
+          )}
+
           <tr>
             <td>Total (₹) : </td>
             <td>{` ${totalPrice.toFixed(2)}`}</td>
@@ -237,7 +249,7 @@ const AddPageContainer = () => {
       </table>
 
       <div className='d-flex justify-content-between align-items-center mt-2 mb-1 px-1'>
-        {data.length ? (
+        {data.length && !readOnly ? (
           <Button
             className='submit__button'
             disabled={!data.length}
@@ -248,15 +260,18 @@ const AddPageContainer = () => {
         ) : (
           <div />
         )}
-        <Button className='add__button' onClick={handleAdd}>
-          <i className='bi bi-plus' />
-        </Button>
+        {!readOnly && (
+          <Button className='add__button' onClick={handleAdd}>
+            <i className='bi bi-plus' />
+          </Button>
+        )}
       </div>
 
       <AddDataComponent
         data={data}
         handleChange={handleChange}
         handleClose={handleClose}
+        readOnly={readOnly}
       />
     </div>
   );

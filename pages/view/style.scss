@@ -1,0 +1,63 @@
+.viewProject {
+    color: $text_primary_color;
+    padding-bottom: $padding_bottom;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    .MuiFormControl-root {
+        label {
+            color: white;
+            &.Mui-focused {
+                color: $component_color2_blue;
+            }
+        }
+
+        .MuiOutlinedInput-root {
+            color: white;
+
+            svg {
+                fill: white;
+            }
+
+            &.Mui-focused {
+                .MuiOutlinedInput-notchedOutline {
+                    border-color: $component_color2_blue;
+                }
+
+                .MuiInputAdornment-root {
+                    p {
+                        color: $component_color2_blue;
+                    }
+                }
+            }
+
+            .MuiOutlinedInput-notchedOutline {
+                border-color: rgba(white, 0.1);
+            }
+            .MuiInputAdornment-root {
+                p {
+                    color: white;
+                }
+            }
+        }
+
+        .MuiFormHelperText-root {
+            color: white;
+        }
+    }
+
+    .viewProject__container {
+        .addPage__container {
+            padding: 0px;
+            .calender__chooser {
+                margin-top: 0px;
+            }
+        }
+    }
+
+    .submit__button {
+        background-color: $component_color2_blue;
+        color: $text_primary_color;
+        border-radius: 3px;
+    }
+}

@@ -11,10 +11,10 @@
 
         .calender__chooser {
             padding: 1.5rem 1rem;
-            margin-top: 3rem;
             border-radius: 10px;
             background-color: rgba(white, 0.08);
             @include flexBox(space-between, center);
+            margin-top: 3rem;
 
             // backdrop-filter: saturate(180%) blur(10px);
             border: 2px solid transparent;
