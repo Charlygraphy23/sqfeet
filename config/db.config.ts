@@ -3,15 +3,15 @@
 import mongoose from 'mongoose';
 import { NextApiResponse } from 'next';
 
-export const ServerError = ({
+export const ServerClientError = ({
   message,
   status,
 }: {
   message: string;
   status: number;
-}) => console.log(`${message} & Status ${status}`);
+}) => console.error(`${message} & Status ${status}`);
 
-export const Error = ({
+export const ClientError = ({
   message,
   status,
   res,
@@ -24,7 +24,11 @@ export const Error = ({
 class DB {
   async connect(res: NextApiResponse) {
     if (!process.env.DB_URL)
-      return Error({ message: 'process.env.DB_URL missing', status: 500, res });
+      return ClientError({
+        message: 'process.env.DB_URL missing',
+        status: 500,
+        res,
+      });
 
     return mongoose
       .connect(process.env.DB_URL)

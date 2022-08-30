@@ -59,4 +59,4 @@ schema.statics.find = () => model.find();
 schema.statics.taskByProjectId = (projectId: mongoose.Types.ObjectId) =>
   model.find({ projectId });
 
-export default model;
+export const taskModel = model;

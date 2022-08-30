@@ -1,42 +1,64 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable no-unused-vars */
 import mongoose from 'mongoose';
-
-export type TaskModelType = {
-  title?: string;
-  description?: string;
-  width?: number;
-  length?: number;
-  diameter?: number;
-  createdby?: mongoose.Types.ObjectId;
-  projectId?: mongoose.Types.ObjectId;
-};
 
 const schema = new mongoose.Schema(
   {
     firstName: {
       type: String,
+      trim: true,
       default: '',
     },
 
     lastName: {
       type: String,
       default: '',
+      trim: true,
     },
 
     profileImage: {
       type: String,
       default: '',
     },
+    loginType: {
+      type: String,
+      default: 'google',
+      trim: true,
+    },
+    googleId: {
+      type: String,
+      unique: true,
+    },
+    email: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
   },
-  { timestamps: true }
+  {
+    statics: {
+      _findById(_id: mongoose.Types.ObjectId) {
+        return this.findById(_id);
+      },
+
+      _find() {
+        return this.find();
+      },
+
+      _findByGoogleId(_id: string) {
+        return this.findOne({ googleId: _id });
+      },
+    },
+    timestamps: true,
+  }
 );
 
-const model = mongoose.model<TaskModelType>('tasks', schema);
+schema.index({ email: 1, googleId: 1 });
 
-schema.statics.findById = (_id: mongoose.Types.ObjectId) => model.findById(_id);
+type ModelType = typeof schema;
 
-schema.statics.find = () => model.find();
+const model =
+  mongoose.models?.users ?? mongoose.model<ModelType>('users', schema);
 
-schema.statics.taskByProjectId = (projectId: mongoose.Types.ObjectId) =>
-  model.find({ projectId });
-
-export default model;
+export const UserModel = model;

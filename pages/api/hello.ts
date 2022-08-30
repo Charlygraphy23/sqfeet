@@ -10,7 +10,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  await MONGO_DB.connect(res);
+  await MONGO_DB.connect();
 
   await MONGO_DB.disconnect();
 

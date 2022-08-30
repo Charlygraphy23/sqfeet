@@ -43,4 +43,4 @@ schema.statics.findById = (_id: mongoose.Types.ObjectId) => model.findById(_id);
 
 schema.statics.find = () => model.find();
 
-export default model;
+export const projectModel = model;
