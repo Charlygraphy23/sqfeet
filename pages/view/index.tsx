@@ -1,12 +1,22 @@
 /* eslint-disable prettier/prettier */
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import Button from 'components/button';
 import Footer from 'components/footer';
 import ViewProject from 'components/viewProject';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 const ViewPage = () => {
 
     const [selectedProject, setSelectedProject] = useState('');
+    const [readOnly, setReadOnly] = useState(true);
+
+
+    const handleReadOnly = useCallback(() => {
+
+        setReadOnly(prevState => !prevState);
+
+    }, []);
+
 
     return (
         <div className='viewProject'>
@@ -35,7 +45,13 @@ const ViewPage = () => {
                 </FormControl>
             </div>
 
-            {selectedProject && <ViewProject />}
+
+
+            {selectedProject && <>
+                <Button className='mt-1' onClick={handleReadOnly}> {readOnly ? 'Edit' : 'Cancel'} </Button>
+                <ViewProject readOnly={readOnly} />
+
+            </>}
 
             <Footer />
         </div>
