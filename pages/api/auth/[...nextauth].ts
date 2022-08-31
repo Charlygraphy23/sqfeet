@@ -37,6 +37,11 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           return '/';
         }
       },
+      async session({ user, session }) {
+        // @ts-expect-error
+        session.user.id = user.id;
+        return session;
+      },
     },
 
     pages: {

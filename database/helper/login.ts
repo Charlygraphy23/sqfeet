@@ -41,11 +41,11 @@ const signUp = (params: HandleLoginType) => {
 // eslint-disable-next-line import/prefer-default-export
 export const handleLogin = async (params: HandleLoginType) => {
   const { user } = params;
+  // @ts-expect-error
   const foundUser = await UserModel._findByGoogleId(user.id);
 
   if (!foundUser) {
     return signUp(params);
   }
-  console.log({ foundUser });
   return foundUser;
 };

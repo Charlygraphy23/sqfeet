@@ -1,25 +1,17 @@
 import mongoose from 'mongoose';
 
-export type TaskModelType = {
-  title?: string;
-  description?: string;
-  width?: number;
-  length?: number;
-  diameter?: number;
-  createdby?: mongoose.Types.ObjectId;
-  projectId?: mongoose.Types.ObjectId;
-};
-
 const schema = new mongoose.Schema(
   {
     title: {
       type: String,
       default: '',
+      trim: true,
     },
 
     description: {
       type: String,
       default: '',
+      trim: true,
     },
 
     width: {
@@ -47,16 +39,30 @@ const schema = new mongoose.Schema(
       ref: 'projects',
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+
+    statics: {
+      _findById(_id: mongoose.Types.ObjectId) {
+        return this.findById(_id);
+      },
+
+      _find() {
+        return this.find();
+      },
+
+      taskByProjectId(projectId: mongoose.Types.ObjectId) {
+        return this.findOne({ projectId });
+      },
+    },
+  }
 );
 
-const model = mongoose.model<TaskModelType>('tasks', schema);
+schema.index({ projectId: 1, createdby: 1 });
 
-schema.statics.findById = (_id: mongoose.Types.ObjectId) => model.findById(_id);
+export type TaskModelType = typeof schema;
 
-schema.statics.find = () => model.find();
+const model =
+  mongoose.models.tasks ?? mongoose.model<TaskModelType>('tasks', schema);
 
-schema.statics.taskByProjectId = (projectId: mongoose.Types.ObjectId) =>
-  model.find({ projectId });
-
-export const taskModel = model;
+export const TaskModel = model;

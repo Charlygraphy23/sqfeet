@@ -1,18 +1,11 @@
 import mongoose from 'mongoose';
 
-export type ProjectModelType = {
-  name?: string;
-  rateOfSquareFt?: number;
-  totalPrice?: number;
-  totalSquareFt?: number;
-  createdby?: mongoose.Types.ObjectId;
-};
-
 const schema = new mongoose.Schema(
   {
     name: {
       type: String,
       default: '',
+      trim: true,
     },
 
     createdby: {
@@ -34,13 +27,28 @@ const schema = new mongoose.Schema(
       default: 0,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    statics: {
+      _findById(_id: mongoose.Types.ObjectId) {
+        return this.findById(_id);
+      },
+      _find() {
+        return this.find();
+      },
+      _findByName(name: string) {
+        return this.findOne({ name: { $regex: `/${name}/i` } });
+      },
+    },
+  }
 );
 
-const model = mongoose.model<ProjectModelType>('projects', schema);
+schema.index({ createdby: 1, name: 1 });
 
-schema.statics.findById = (_id: mongoose.Types.ObjectId) => model.findById(_id);
+export type ProjectModelType = typeof schema;
 
-schema.statics.find = () => model.find();
+const model =
+  mongoose.models.projects ??
+  mongoose.model<ProjectModelType>('projects', schema);
 
-export const projectModel = model;
+export const ProjectModel = model;

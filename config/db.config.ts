@@ -3,7 +3,7 @@
 import mongoose from 'mongoose';
 import { NextApiResponse } from 'next';
 
-export const ServerClientError = ({
+export const ServerError = ({
   message,
   status,
 }: {
@@ -12,8 +12,8 @@ export const ServerClientError = ({
 }) => console.error(`${message} & Status ${status}`);
 
 export const ClientError = ({
-  message,
-  status,
+  message = 'Error',
+  status = 400,
   res,
 }: {
   message: string;
