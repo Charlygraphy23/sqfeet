@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 /* eslint-disable no-unused-vars */
 export const CURRENCY = [
   {
@@ -5,6 +6,12 @@ export const CURRENCY = [
     label: '₹',
   },
 ];
+
+export enum AUTH_STATUS {
+  SUCCESS = 'authenticated',
+  ERROR = 'unauthenticated',
+  LOADING = 'loading',
+}
 
 // eslint-disable-next-line no-shadow
 export enum AREAS {
@@ -48,3 +55,6 @@ export const calculateTotal = ({
   area: number;
   perSquareFtRate: number;
 }) => area * perSquareFtRate;
+
+export const isAuthenticated = (status: AUTH_STATUS) =>
+  [AUTH_STATUS.SUCCESS].includes(status) && status !== AUTH_STATUS.LOADING;

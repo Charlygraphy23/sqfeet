@@ -8,7 +8,7 @@ const schema = new mongoose.Schema(
       trim: true,
     },
 
-    createdby: {
+    createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'users',
     },
@@ -36,8 +36,8 @@ const schema = new mongoose.Schema(
       _find() {
         return this.find();
       },
-      _findByName(name: string) {
-        return this.findOne({ name: { $regex: `/${name}/i` } });
+      _findByName(name: string, id: mongoose.Types.ObjectId) {
+        return this.findOne({ name: { $regex: `/${name}/i` }, createdby: id });
       },
     },
   }

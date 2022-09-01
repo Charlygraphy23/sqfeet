@@ -11,18 +11,15 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       GoogleProvider({
         clientId: process.env.CLIENT_ID ?? '',
         clientSecret: process.env.CLIENT_SECRET ?? '',
-        authorization: {
-          params: {
-            prompt: 'consent',
-            access_type: 'offline',
-            response_type: 'code',
-          },
-        },
       }),
-
-      // ...add more providers here
     ],
+
     callbacks: {
+      async session({ session, token }) {
+        // @ts-expect-error
+        session.user.userId = token.sub;
+        return session;
+      },
       async signIn({ account, profile, user }) {
         await MONGO_DB.connect(res);
 
@@ -30,23 +27,21 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
           // @ts-expect-error
           await handleLogin({ account, profile, user });
 
-          return '/dashboard';
+          await MONGO_DB.disconnect();
+          return true;
         } catch (err: any) {
           await MONGO_DB.disconnect();
           ClientError({ message: err?.message, status: 401, res });
           return '/';
         }
       },
-      async session({ user, session }) {
-        // @ts-expect-error
-        session.user.id = user.id;
-        return session;
-      },
     },
-
     pages: {
       signIn: '/',
       error: '/',
     },
+
+    secret: process.env.AUTH_SECRET,
+    debug: true,
   });
 }

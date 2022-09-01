@@ -14,7 +14,7 @@ const LoginBottomSection = () => (
             className='px-2 w-100 d-flex justify-content-center align-items-center'
             style={{ flexDirection: 'column' }}
         >
-            <Button className='login__button' onClick={() => signIn('google')}>
+            <Button className='login__button' onClick={() => signIn('google', { callbackUrl: 'http://localhost:3000/dashboard' })}>
                 <span>
                     <i className='bi bi-envelope-fill' />
                     <span style={{ marginLeft: '5px' }}>Continue with google</span>
