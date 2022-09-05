@@ -11,13 +11,27 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
       GoogleProvider({
         clientId: process.env.CLIENT_ID ?? '',
         clientSecret: process.env.CLIENT_SECRET ?? '',
+        authorization: {
+          params: {
+            prompt: 'consent',
+            access_type: 'offline',
+            response_type: 'code',
+          },
+        },
       }),
     ],
 
     callbacks: {
+      async jwt({ token, account }) {
+        if (account?.access_token) {
+          token.accessToken = account?.id_token;
+        }
+        return token;
+      },
       async session({ session, token }) {
         // @ts-expect-error
         session.user.userId = token.sub;
+        session.accessToken = token.accessToken;
         return session;
       },
       async signIn({ account, profile, user }) {
@@ -42,6 +56,5 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
     },
 
     secret: process.env.AUTH_SECRET,
-    debug: true,
   });
 }

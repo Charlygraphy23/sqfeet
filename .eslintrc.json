@@ -39,6 +39,8 @@
     "jsx-quotes": ["error", "prefer-single"],
     "linebreak-style": 0,
     "import/extensions": 0,
+    "import/prefer-default-export": 0,
+    "no-throw-literal": 0,
     "react/jsx-props-no-spreading": 0,
     "arrow-body-style": ["error", "as-needed"],
     "consistent-return": 0,

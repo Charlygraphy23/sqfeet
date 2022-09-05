@@ -9,7 +9,11 @@ export const ServerError = ({
 }: {
   message: string;
   status: number;
-}) => console.error(`${message} & Status ${status}`);
+}) => {
+  const error = `${message} & Status ${status}`;
+  console.error(error);
+  return Promise.reject(error);
+};
 
 export const ClientError = ({
   message = 'Error',
@@ -21,14 +25,48 @@ export const ClientError = ({
   res: NextApiResponse;
 }) => res.status(status).json({ message, status });
 
+export const Response = <T>({
+  message = 'Success',
+  status = true,
+  res,
+  data,
+}: {
+  message: string;
+  status?: boolean;
+  res: NextApiResponse;
+  data?: T;
+}) => res.status(200).json({ message, status, data });
+
+export const AppResponse = <T>({
+  status = 'SUCCESS',
+  data,
+  error = null,
+  code = 500,
+}: {
+  status: 'ERROR' | 'SUCCESS';
+  error: any;
+  data: T;
+  code: number;
+}) => ({
+  data,
+  status,
+  error,
+  code,
+});
 class DB {
-  async connect(res: NextApiResponse) {
-    if (!process.env.DB_URL)
-      return ClientError({
+  async connect(res?: NextApiResponse) {
+    if (!process.env.DB_URL) {
+      if (res)
+        return ClientError({
+          message: 'process.env.DB_URL missing',
+          status: 500,
+          res,
+        });
+      return ServerError({
         message: 'process.env.DB_URL missing',
         status: 500,
-        res,
       });
+    }
 
     return mongoose
       .connect(process.env.DB_URL)
@@ -36,7 +74,9 @@ class DB {
   }
 
   async disconnect() {
-    return mongoose.disconnect().then(() => console.log('Disconnected !!'));
+    console.log('[DB] status', mongoose.connection.readyState);
+    if (![0, 3, 99].includes(mongoose.connection.readyState))
+      return mongoose.disconnect().then(() => console.log('Disconnected !!'));
   }
 }
 

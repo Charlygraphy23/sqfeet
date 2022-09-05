@@ -8,6 +8,9 @@ import {
 } from '@mui/material';
 import Button from 'components/button';
 import Footer from 'components/footer';
+import { getAllProjectsByUser } from 'database/helper';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useCallback } from 'react';
 
@@ -61,5 +64,43 @@ const AddProject = () => {
         </div>
     );
 };
+
+
+
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+
+
+    const session = await getSession({ req: context.req });
+
+    // ? if not authorized
+    if (!session) return {
+        props: {},
+        redirect: {
+            destination: '/',
+            statusCode: '301'
+        }
+    };
+
+    try {
+
+        const response = await getAllProjectsByUser({ req: context.req });
+
+
+        console.log('[DEBUG] ', response);
+
+        return {
+            props: {}
+        };
+    }
+
+    catch (err: any) {
+        console.error('[Sever Side] Error', err.message);
+
+        return {
+            props: {}
+        };
+    }
+};
+
 
 export default AddProject;

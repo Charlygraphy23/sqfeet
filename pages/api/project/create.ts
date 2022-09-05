@@ -1,5 +1,5 @@
 /* eslint-disable no-throw-literal */
-import DB, { ClientError, ServerError } from 'config/db.config';
+import DB, { ClientError, Response, ServerError } from 'config/db.config';
 import { ProjectModel, UserModel } from 'database';
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
@@ -39,10 +39,9 @@ const handler: NextApiHandler = async (
 
     // @ts-expect-error
     const projectFound = await ProjectModel._findByName(name, userFound?._id);
+    console.log('Project ', projectFound);
 
-    if (projectFound) throw { message: 'Project Exist', status: 400 };
-
-    console.log('Id', userFound?._id.toString());
+    if (projectFound.length) throw { message: 'Project Exist', status: 400 };
 
     await ProjectModel.create({
       name,
@@ -51,9 +50,9 @@ const handler: NextApiHandler = async (
 
     await DB.disconnect();
 
-    return res.status(201).json({
+    return Response({
       message: 'Success',
-      status: true,
+      res,
     });
   } catch (err: any) {
     await DB.disconnect();

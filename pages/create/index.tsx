@@ -15,12 +15,10 @@ const CreateProject = () => {
     const [loading, setLoading] = useState(false);
     const { data, status } = useSession();
 
-
+    console.log(data);
 
     const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-
         setName(e.target.value);
-
     }, []);
 
     const handleProject = useCallback(() => {
@@ -29,6 +27,7 @@ const CreateProject = () => {
 
         setLoading(true);
         axios.post('/api/project/create', { name }).then(() => {
+            setName('');
             setLoading(false);
         })
             .catch((err) => {
@@ -51,7 +50,7 @@ const CreateProject = () => {
 
             <TextFields fullWidth label='Name of the project' className='mb-3' value={name} onChange={handleChange} />
 
-            <Button className='submit__button' value='Submit' onClick={handleProject} loading={loading} />
+            <Button loaderColor='white' className='submit__button' value='Submit' onClick={handleProject} loading={loading} />
 
             <Footer />
         </div>

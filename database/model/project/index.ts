@@ -36,8 +36,14 @@ const schema = new mongoose.Schema(
       _find() {
         return this.find();
       },
+      _findByUser(_id: mongoose.Types.ObjectId) {
+        return this.find({ createdby: _id });
+      },
       _findByName(name: string, id: mongoose.Types.ObjectId) {
-        return this.findOne({ name: { $regex: `/${name}/i` }, createdby: id });
+        return this.find({
+          name: { $regex: `^${name.toLowerCase()}$`, $options: 'i' },
+          createdby: id,
+        });
       },
     },
   }
