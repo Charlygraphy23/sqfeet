@@ -1,4 +1,8 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-shadow */
+
+import { AddDataType, TaskData } from 'interface';
+
 /* eslint-disable no-unused-vars */
 export const CURRENCY = [
   {
@@ -58,3 +62,19 @@ export const calculateTotal = ({
 
 export const isAuthenticated = (status: AUTH_STATUS) =>
   [AUTH_STATUS.SUCCESS].includes(status) && status !== AUTH_STATUS.LOADING;
+
+export const calculateProjectTotal = (data: AddDataType[] | TaskData[]) =>
+  data.reduce(
+    // @ts-expect-error
+    (prevState: any, currState: any) => {
+      if (currState.sq || currState.total) {
+        return {
+          price: prevState.price + (currState.total || 0),
+          sqft: prevState.sqft + (currState.sq || 0),
+        };
+      }
+
+      return { price: prevState?.price, sqft: prevState?.sqft };
+    },
+    { price: 0, sqft: 0 }
+  );

@@ -17,6 +17,11 @@ const schema = new mongoose.Schema(
       default: 0,
     },
 
+    date: {
+      type: Number,
+      default: 0,
+    },
+
     totalPrice: {
       type: Number,
       default: 0,
@@ -40,10 +45,13 @@ const schema = new mongoose.Schema(
         return this.find({ createdby: _id });
       },
       _findByName(name: string, id: mongoose.Types.ObjectId) {
-        return this.find({
-          name: { $regex: `^${name.toLowerCase()}$`, $options: 'i' },
-          createdby: id,
-        });
+        return this.find(
+          {
+            name: { $regex: `^${name.toLowerCase()}$`, $options: 'i' },
+            createdby: id,
+          },
+          { _v: 0 }
+        );
       },
     },
   }

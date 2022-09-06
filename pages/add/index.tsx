@@ -8,15 +8,20 @@ import {
 } from '@mui/material';
 import Button from 'components/button';
 import Footer from 'components/footer';
+import { serializeToObject } from 'config/db.config';
 import { getAllProjectsByUser } from 'database/helper';
+import { Project } from 'interface';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
-/* eslint-disable prettier/prettier */
-const AddProject = () => {
+type Props = {
+    data: Project[]
+}
 
+const AddProject = ({ data }: Props) => {
+    const [selectedId, setSelectedId] = useState('');
     const router = useRouter();
 
     const handleNavigate = useCallback(() => {
@@ -25,9 +30,9 @@ const AddProject = () => {
     }, [router]);
 
     const handleProjectChange = useCallback((e: SelectChangeEvent) => {
-
-        router.push(`/add/${e.target.value}`);
-
+        const { value } = e.target;
+        router.push(`/add/${value}`);
+        setSelectedId(value);
     }, [router]);
 
 
@@ -45,16 +50,14 @@ const AddProject = () => {
                     <Select
                         labelId='demo-simple-select-helper-label'
                         id='demo-simple-select-helper'
-                        // value={age}
+                        value={selectedId}
                         label='Select Project'
                         onChange={handleProjectChange}
                     >
                         <MenuItem value=''>
                             <em>None</em>
                         </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        {data.map((_val) => <MenuItem key={_val._id?.toString()} value={_val._id?.toString()}>{_val.name}</MenuItem>)}
                     </Select>
 
                 </FormControl>
@@ -74,32 +77,23 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
 
     // ? if not authorized
     if (!session) return {
-        props: {},
+        props: {
+            data: []
+        },
         redirect: {
             destination: '/',
             statusCode: '301'
         }
     };
 
-    try {
+    const response = await getAllProjectsByUser({ req: context.req });
+    const data = serializeToObject<any[]>(response.data).map(_val => _val?._doc);
 
-        const response = await getAllProjectsByUser({ req: context.req });
-
-
-        console.log('[DEBUG] ', response);
-
-        return {
-            props: {}
-        };
-    }
-
-    catch (err: any) {
-        console.error('[Sever Side] Error', err.message);
-
-        return {
-            props: {}
-        };
-    }
+    return {
+        props: {
+            data
+        }
+    };
 };
 
 

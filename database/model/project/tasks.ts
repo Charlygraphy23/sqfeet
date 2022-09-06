@@ -1,3 +1,4 @@
+import { AREAS } from 'config/app.config';
 import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema(
@@ -14,7 +15,23 @@ const schema = new mongoose.Schema(
       trim: true,
     },
 
+    type: {
+      type: String,
+      default: AREAS.RECTANGLE,
+      enum: AREAS,
+    },
+
     width: {
+      type: Number,
+      default: 0,
+    },
+
+    sq: {
+      type: Number,
+      default: 0,
+    },
+
+    total: {
       type: Number,
       default: 0,
     },

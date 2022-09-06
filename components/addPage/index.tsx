@@ -1,8 +1,15 @@
+/* eslint-disable prettier/prettier */
 import { SelectChangeEvent } from '@mui/material';
+import axios from 'axios';
 import Button from 'components/button';
 import Calender from 'components/calender';
 import TextFields from 'components/textField';
-import { AREAS, calculateArea, calculateTotal } from 'config/app.config';
+import {
+  AREAS,
+  calculateArea,
+  calculateProjectTotal,
+  calculateTotal
+} from 'config/app.config';
 import { AddDataType } from 'interface';
 import moment from 'moment';
 import { ChangeEvent, useCallback, useMemo, useState } from 'react';
@@ -12,9 +19,10 @@ import AddDataComponent from './components/AddDataComponent';
 type Props = {
   // eslint-disable-next-line react/require-default-props
   readOnly?: boolean;
+  id: string
 };
 
-const AddPageContainer = ({ readOnly = false }: Props) => {
+const AddPageContainer = ({ readOnly = false, id }: Props) => {
   const [date, setDate] = useState(moment().clone());
   const initialState = useMemo(
     () => ({
@@ -35,19 +43,7 @@ const AddPageContainer = ({ readOnly = false }: Props) => {
   const [totalSquareFt, setTotalSquareFt] = useState(0.0);
 
   const calculateTotalOverall = useCallback((_data: AddDataType[]) => {
-    const { price = 0, sqft = 0 } = _data.reduce(
-      (prevState, currState: any) => {
-        if (currState.sq || currState.total) {
-          return {
-            price: prevState.price + (currState.total || 0),
-            sqft: prevState.sqft + (currState.sq || 0),
-          };
-        }
-
-        return prevState;
-      },
-      { price: 0, sqft: 0 }
-    );
+    const { price = 0, sqft = 0 } = calculateProjectTotal(_data);
 
     setTotalPrice(price);
     setTotalSquareFt(sqft);
@@ -196,8 +192,29 @@ const AddPageContainer = ({ readOnly = false }: Props) => {
     setPerSquareFtRateError(false);
     if (!perSquareFtRate) setPerSquareFtRateError(true);
 
+    const prepareData = data.map((val: any) => {
+
+      if (val?.errors)
+        delete val?.errors;
+
+      return val;
+    });
+
+
+    axios.post('/api/project/task/create', {
+      date: date.unix(),
+      ratePerSqaureFt: perSquareFtRate,
+      projectId: id,
+      taskList: prepareData
+    }).then(() => {
+      alert('Demo');
+    })
+      .catch(err => {
+        console.error(err);
+      });
+
     console.log('hasError', hasError);
-  }, [checkValidation, perSquareFtRate]);
+  }, [checkValidation, data, date, id, perSquareFtRate]);
 
   return (
     <div className='addPage__container'>

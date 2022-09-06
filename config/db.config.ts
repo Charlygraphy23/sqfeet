@@ -1,5 +1,6 @@
 /* eslint-disable class-methods-use-this */
 
+import { isDate } from 'moment';
 import mongoose from 'mongoose';
 import { NextApiResponse } from 'next';
 
@@ -79,5 +80,35 @@ class DB {
       return mongoose.disconnect().then(() => console.log('Disconnected !!'));
   }
 }
+
+export const serializeToObject = <T>(data: any): T => {
+  if (Array.isArray(data)) {
+    // @ts-expect-error
+    return data.map((val) => serializeToObject(val));
+  }
+
+  if (data && typeof data === 'object') {
+    const tempObj = {} as T;
+    Object.keys(data).forEach((key) => {
+      const val = data[key];
+      if (val && mongoose.Types.ObjectId.isValid(val)) {
+        // @ts-expect-error
+        tempObj[key] = String(val);
+      } else if (val && isDate(val)) {
+        // @ts-expect-error
+        tempObj[key] = val.toString();
+      } else if (val && typeof val === 'object') {
+        // @ts-expect-error
+        tempObj[key] = serializeToObject(val);
+      } else {
+        // @ts-expect-error
+        tempObj[key] = val;
+      }
+    });
+
+    return tempObj;
+  }
+  return data;
+};
 
 export default new DB();
