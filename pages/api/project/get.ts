@@ -1,6 +1,7 @@
 /* eslint-disable no-throw-literal */
 import DB, { ClientError, Response, ServerError } from 'config/db.config';
 import { ProjectModel, UserModel } from 'database';
+import mongoose from 'mongoose';
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 
@@ -16,7 +17,7 @@ const handler: NextApiHandler = async (
     });
 
   try {
-    const { name } = req.body;
+    const { projectId } = req.body;
 
     // check sign in
     const session = await getSession({ req });
@@ -24,7 +25,7 @@ const handler: NextApiHandler = async (
     if (!session) throw { message: 'Un-Authorized', status: 401 };
     const { user } = session;
 
-    if (!name) throw { message: 'Please provide project name', status: 422 };
+    if (!projectId) throw { message: 'Please provide project id', status: 422 };
 
     await DB.connect(res);
 
@@ -37,21 +38,42 @@ const handler: NextApiHandler = async (
         status: 400,
       };
 
-    // @ts-expect-error
-    const projectFound = await ProjectModel._findByName(name, userFound?._id);
+    const projectData = await ProjectModel.aggregate([
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$_id', new mongoose.Types.ObjectId(projectId)] },
+              { $eq: ['$createdBy', userFound?._id] },
+            ],
+          },
+        },
+      },
 
-    if (projectFound.length) throw { message: 'Project Exist', status: 400 };
-
-    await ProjectModel.create({
-      name,
-      createdBy: userFound?._id,
-    });
+      {
+        $lookup: {
+          from: 'tasks',
+          let: { projectId: '$_id', userId: userFound?._id },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ['$projectId', '$$projectId'] }],
+                },
+              },
+            },
+          ],
+          as: 'tasks',
+        },
+      },
+    ]);
 
     await DB.disconnect();
 
     return Response({
       message: 'Success',
       res,
+      data: projectData?.[0] ?? [],
     });
   } catch (err: any) {
     await DB.disconnect();

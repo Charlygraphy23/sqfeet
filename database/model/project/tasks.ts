@@ -46,6 +46,11 @@ const schema = new mongoose.Schema(
       default: 0,
     },
 
+    date: {
+      type: Number,
+      default: 0,
+    },
+
     createdby: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'users',

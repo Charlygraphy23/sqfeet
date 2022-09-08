@@ -7,13 +7,14 @@ const AddPage = () => {
 
     const router = useRouter();
     const { project } = router.query;
+    const id = String(project);
 
     return (
         <div className='addPage'>
             <h1 className='page_title mt-3'>Add Data</h1>
 
 
-            <AddPageContainer id={project} />
+            <AddPageContainer id={id ?? ''} />
 
             <Footer />
         </div>

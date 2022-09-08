@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { AREAS } from 'config/app.config';
 import { Moment } from 'moment';
 import mongoose from 'mongoose';
@@ -16,6 +17,7 @@ export type TaskData = {
   total?: number;
   sq?: number;
   type?: AREAS;
+  data?: number;
   [key: string]: any;
 };
 
@@ -30,4 +32,8 @@ export interface Project {
   rateOfSquareFt: number;
   totalPrice: number;
   totalSquareFt: number;
+}
+
+export interface ProjectData extends Project {
+  tasks: TaskData[];
 }

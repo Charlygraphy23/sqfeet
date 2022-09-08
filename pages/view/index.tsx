@@ -3,9 +3,17 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import Button from 'components/button';
 import Footer from 'components/footer';
 import ViewProject from 'components/viewProject';
+import { serializeToObject } from 'config/db.config';
+import { getAllProjectsByUser } from 'database/helper';
+import { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import { getSession } from 'next-auth/react';
 import { useCallback, useState } from 'react';
 
-const ViewPage = () => {
+type Props = {
+    data: any[]
+}
+
+const ViewPage = ({ data }: Props) => {
 
     const [selectedProject, setSelectedProject] = useState('');
     const [readOnly, setReadOnly] = useState(true);
@@ -38,9 +46,9 @@ const ViewPage = () => {
                         <MenuItem value=''>
                             <em>None</em>
                         </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                        {data.length && data?.map((val) => <MenuItem key={val?._id} value={val?._id}>{val?.name}</MenuItem>)}
+
+
                     </Select>
                 </FormControl>
             </div>
@@ -48,14 +56,40 @@ const ViewPage = () => {
 
 
             {selectedProject && <>
-                <Button className='mt-1' onClick={handleReadOnly}> {readOnly ? 'Edit' : 'Cancel'} </Button>
-                <ViewProject readOnly={readOnly} />
+                <Button className='mt-1' onClick={handleReadOnly} value={readOnly ? 'Edit' : 'Cancel'} />
+                <ViewProject readOnly={readOnly} id={selectedProject} />
 
             </>}
 
             <Footer />
         </div>
     );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
+
+
+    const session = await getSession({ req: context.req });
+
+    // ? if not authorized
+    if (!session) return {
+        props: {
+            data: []
+        },
+        redirect: {
+            destination: '/',
+            statusCode: '301'
+        }
+    };
+
+    const response = await getAllProjectsByUser({ req: context.req });
+    const data = serializeToObject<any[]>(response.data).map(_val => _val?._doc);
+
+    return {
+        props: {
+            data
+        }
+    };
 };
 
 export default ViewPage;

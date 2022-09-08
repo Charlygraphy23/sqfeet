@@ -1,3 +1,5 @@
+/* eslint-disable react/require-default-props */
+/* eslint-disable no-param-reassign */
 /* eslint-disable prettier/prettier */
 import { SelectChangeEvent } from '@mui/material';
 import axios from 'axios';
@@ -10,7 +12,7 @@ import {
   calculateProjectTotal,
   calculateTotal
 } from 'config/app.config';
-import { AddDataType } from 'interface';
+import { AddDataType, ProjectData } from 'interface';
 import moment from 'moment';
 import { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import validator from 'validator';
@@ -19,10 +21,11 @@ import AddDataComponent from './components/AddDataComponent';
 type Props = {
   // eslint-disable-next-line react/require-default-props
   readOnly?: boolean;
-  id: string
+  id: string,
+  projectData?: ProjectData
 };
 
-const AddPageContainer = ({ readOnly = false, id }: Props) => {
+const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
   const [date, setDate] = useState(moment().clone());
   const initialState = useMemo(
     () => ({
@@ -36,11 +39,11 @@ const AddPageContainer = ({ readOnly = false, id }: Props) => {
     }),
     []
   );
-  const [data, setData] = useState<AddDataType[]>([]);
-  const [perSquareFtRate, setPerSquareFtRate] = useState(0);
+  const [data, setData] = useState<AddDataType[]>(projectData ? projectData?.tasks : []);
+  const [perSquareFtRate, setPerSquareFtRate] = useState(projectData?.rateOfSquareFt ?? 0);
   const [perSquareFtRateError, setPerSquareFtRateError] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(0.0);
-  const [totalSquareFt, setTotalSquareFt] = useState(0.0);
+  const [totalPrice, setTotalPrice] = useState(projectData?.totalPrice ?? 0.0);
+  const [totalSquareFt, setTotalSquareFt] = useState(projectData?.totalSquareFt ?? 0.0);
 
   const calculateTotalOverall = useCallback((_data: AddDataType[]) => {
     const { price = 0, sqft = 0 } = calculateProjectTotal(_data);

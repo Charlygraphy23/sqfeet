@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-throw-literal */
 import {
-    calculateArea,
-    calculateProjectTotal,
-    calculateTotal
+  calculateArea,
+  calculateProjectTotal,
+  calculateTotal
 } from 'config/app.config';
 import DB, { ClientError, Response, ServerError } from 'config/db.config';
 import { ProjectModel, TaskModel, UserModel } from 'database';
@@ -21,9 +21,12 @@ const handler: NextApiHandler = async (
       status: 400,
       res,
     });
-
-  try {
     const { date, ratePerSqaureFt, projectId, taskList } = req.body;
+    const mongoSession = await mongoose.startSession();
+    await mongoSession.startTransaction();
+
+    
+  try {
 
     if (!date || !ratePerSqaureFt)
       throw { message: 'Please provide date and square feet', status: 422 };
@@ -38,8 +41,7 @@ const handler: NextApiHandler = async (
     const { user } = session;
     await DB.connect(res);
 
-    const mongoSession = await mongoose.startSession();
-    await mongoSession.startTransaction();
+    
 
     // @ts-expect-error
     const userFound = await UserModel._findByGoogleId(user?.userId);
@@ -72,6 +74,7 @@ const handler: NextApiHandler = async (
         sq: area,
         createdby: userFound?._id,
         projectId: projectFound?._id,
+        date
       };
     });
 
@@ -98,6 +101,10 @@ const handler: NextApiHandler = async (
       res,
     });
   } catch (err: any) {
+
+    await mongoSession.abortTransaction();
+    mongoSession.endSession();
+
     await DB.disconnect();
     ServerError({ message: err?.message, status: err?.status });
     return ClientError({
