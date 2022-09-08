@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
-import Button from 'components/button';
 import Footer from 'components/footer';
 import ViewProject from 'components/viewProject';
 import { serializeToObject } from 'config/db.config';
@@ -56,8 +55,7 @@ const ViewPage = ({ data }: Props) => {
 
 
             {selectedProject && <>
-                <Button className='mt-1' onClick={handleReadOnly} value={readOnly ? 'Edit' : 'Cancel'} />
-                <ViewProject readOnly={readOnly} id={selectedProject} />
+                <ViewProject readOnly={readOnly} id={selectedProject} handleReadOnly={handleReadOnly} />
 
             </>}
 

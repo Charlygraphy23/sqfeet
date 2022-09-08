@@ -1,14 +1,11 @@
-import Footer from "components/footer"
+/* eslint-disable prettier/prettier */
+import Footer from 'components/footer';
 
-const DashboardPage = () => {
-    return (
-        <section className="dashboard">
-            DashboardPage
+const DashboardPage = () => (
+    <section className='dashboard'>
+        DashboardPage
+        <Footer />
+    </section>
+);
 
-
-            <Footer />
-        </section>
-    )
-}
-
-export default DashboardPage
+export default DashboardPage;

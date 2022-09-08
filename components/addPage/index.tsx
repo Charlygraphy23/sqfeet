@@ -2,7 +2,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable prettier/prettier */
 import { SelectChangeEvent } from '@mui/material';
-import axios from 'axios';
 import Button from 'components/button';
 import Calender from 'components/calender';
 import TextFields from 'components/textField';
@@ -14,18 +13,21 @@ import {
 } from 'config/app.config';
 import { AddDataType, ProjectData } from 'interface';
 import moment from 'moment';
-import { ChangeEvent, useCallback, useMemo, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import validator from 'validator';
+import { axiosInstance } from '_http';
 import AddDataComponent from './components/AddDataComponent';
 
 type Props = {
   // eslint-disable-next-line react/require-default-props
   readOnly?: boolean;
   id: string,
-  projectData?: ProjectData
+  projectData?: ProjectData,
+  hideDate?: boolean,
+  update?: boolean
 };
 
-const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
+const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false, update = false }: Props) => {
   const [date, setDate] = useState(moment().clone());
   const initialState = useMemo(
     () => ({
@@ -39,11 +41,12 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
     }),
     []
   );
-  const [data, setData] = useState<AddDataType[]>(projectData ? projectData?.tasks : []);
-  const [perSquareFtRate, setPerSquareFtRate] = useState(projectData?.rateOfSquareFt ?? 0);
+  const [data, setData] = useState<AddDataType[]>([]);
+  const [perSquareFtRate, setPerSquareFtRate] = useState(0);
   const [perSquareFtRateError, setPerSquareFtRateError] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(projectData?.totalPrice ?? 0.0);
-  const [totalSquareFt, setTotalSquareFt] = useState(projectData?.totalSquareFt ?? 0.0);
+  const [totalPrice, setTotalPrice] = useState(0.0);
+  const [totalSquareFt, setTotalSquareFt] = useState(0.0);
+  const [deletedTaskIds, setDeletedTaskIds] = useState<string[]>([]);
 
   const calculateTotalOverall = useCallback((_data: AddDataType[]) => {
     const { price = 0, sqft = 0 } = calculateProjectTotal(_data);
@@ -132,7 +135,13 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
 
   const handleClose = useCallback((index: number) => {
     setData((prevState) => prevState.filter((_, i) => i !== index));
-  }, []);
+
+    if (!update) return;
+    const taskId = data[index]?._id;
+    if (!taskId) return;
+    setDeletedTaskIds(prevState => [...prevState, taskId]);
+
+  }, [data, update]);
 
   const checkValidation = useCallback(() => {
     let flag = false;
@@ -193,6 +202,8 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
   const handleSubmit = useCallback(() => {
     const hasError = checkValidation();
     setPerSquareFtRateError(false);
+
+    if (hasError) return;
     if (!perSquareFtRate) setPerSquareFtRateError(true);
 
     const prepareData = data.map((val: any) => {
@@ -204,7 +215,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
     });
 
 
-    axios.post('/api/project/task/create', {
+    axiosInstance.post('/project/task/create', {
       date: date.unix(),
       ratePerSqaureFt: perSquareFtRate,
       projectId: id,
@@ -216,18 +227,57 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
         console.error(err);
       });
 
-    console.log('hasError', hasError);
   }, [checkValidation, data, date, id, perSquareFtRate]);
+
+  const handleUpdate = useCallback(() => {
+    const hasError = checkValidation();
+    setPerSquareFtRateError(false);
+
+
+    if (hasError) return;
+    if (!perSquareFtRate) setPerSquareFtRateError(true);
+
+    const prepareData = data.map((val: any) => {
+
+      if (val?.errors)
+        delete val?.errors;
+
+      return val;
+    });
+
+    axiosInstance.post('/project/update', {
+      ratePerSqaureFt: perSquareFtRate,
+      projectId: id,
+      taskList: prepareData,
+      deletedTaskIds
+    }).then(() => {
+      alert('Demo');
+    })
+      .catch(err => {
+        console.error(err);
+      });
+
+  }, [checkValidation, data, deletedTaskIds, id, perSquareFtRate]);
+
+  useEffect(() => {
+    if (!id || !projectData) return;
+
+
+    setData(projectData?.tasks);
+    setPerSquareFtRate(projectData?.rateOfSquareFt);
+    setTotalPrice(projectData?.totalPrice);
+    setTotalSquareFt(projectData?.totalSquareFt);
+  }, [id, projectData]);
 
   return (
     <div className='addPage__container'>
-      <div className='calender__chooser'>
+      {!hideDate && <div className='calender__chooser'>
         <p>Choose Date :</p>
 
         <div>
           <Calender setToday={setDate} today={date} readOnly={readOnly} />
         </div>
-      </div>
+      </div>}
 
       {!readOnly && (
         <div className='customTextField mt-1'>
@@ -245,7 +295,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
         </div>
       )}
 
-      <table style={{ marginLeft: 'auto' }} className='mt-1'>
+      {data?.length ? <table style={{ marginLeft: 'auto' }} className='mt-1'>
         <tbody>
           {readOnly && (
             <tr>
@@ -256,7 +306,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
 
           <tr>
             <td>Total (₹) : </td>
-            <td>{` ${totalPrice.toFixed(2)}`}</td>
+            <td>{` ${totalPrice?.toFixed(2)}`}</td>
           </tr>
 
           <tr>
@@ -266,14 +316,14 @@ const AddPageContainer = ({ readOnly = false, id, projectData }: Props) => {
             <td>{totalSquareFt}</td>
           </tr>
         </tbody>
-      </table>
+      </table> : <p className='text-center mt-1'>No Result Found!</p>}
 
-      <div className='d-flex justify-content-between align-items-center mt-2 mb-1 px-1'>
-        {data.length && !readOnly ? (
+      <div className='d-flex justify-content-end align-items-center mt-2 mb-1 px-1'>
+        {data?.length && !readOnly ? (
           <Button
-            className='submit__button'
+            className='submit__button mr-1'
             disabled={!data.length}
-            onClick={handleSubmit}
+            onClick={update ? handleUpdate : handleSubmit}
           >
             <i className='bi bi-check-lg' />
           </Button>
