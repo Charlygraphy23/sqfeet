@@ -1,12 +1,17 @@
 /* eslint-disable prettier/prettier */
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { toast } from 'components/alert';
 import Footer from 'components/footer';
+import PageLoader from 'components/loader';
 import ViewProject from 'components/viewProject';
+import { AUTH_STATUS } from 'config/app.config';
 import { serializeToObject } from 'config/db.config';
 import { getAllProjectsByUser } from 'database/helper';
+import { ProjectData } from 'interface';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { getSession } from 'next-auth/react';
-import { useCallback, useState } from 'react';
+import { getSession, useSession } from 'next-auth/react';
+import { useCallback, useEffect, useState } from 'react';
+import { axiosInstance } from '_http';
 
 type Props = {
     data: any[]
@@ -16,14 +21,44 @@ const ViewPage = ({ data }: Props) => {
 
     const [selectedProject, setSelectedProject] = useState('');
     const [readOnly, setReadOnly] = useState(true);
+    const { status } = useSession();
+    const [loading, setLoading] = useState(false);
+    const [projectData, setProjectData] = useState<ProjectData>({} as ProjectData);
+
+
 
 
     const handleReadOnly = useCallback(() => {
-
         setReadOnly(prevState => !prevState);
-
     }, []);
 
+
+    useEffect(() => {
+        if (!selectedProject) return;
+
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        setLoading(true);
+        axiosInstance.post('/project/get', { projectId: selectedProject }, { signal }).then((res) => {
+
+            setProjectData(res?.data?.data);
+            setLoading(false);
+        }).catch(error => {
+            toast.error(error?.message);
+            setLoading(false);
+        });
+
+
+        return () => {
+            setLoading(false);
+            controller.abort();
+        };
+
+    }, [selectedProject]);
+
+
+    if (status === AUTH_STATUS.LOADING) return <PageLoader />;
 
     return (
         <div className='viewProject'>
@@ -54,10 +89,9 @@ const ViewPage = ({ data }: Props) => {
 
 
 
-            {selectedProject && <>
-                <ViewProject readOnly={readOnly} id={selectedProject} handleReadOnly={handleReadOnly} />
 
-            </>}
+            {selectedProject && <ViewProject readOnly={readOnly} id={selectedProject} handleReadOnly={handleReadOnly} loading={loading} projectData={projectData} />}
+
 
             <Footer />
         </div>

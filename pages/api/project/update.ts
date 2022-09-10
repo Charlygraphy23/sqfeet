@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-throw-literal */
 import {
-    calculateArea,
-    calculateProjectTotal,
-    calculateTotal
+  calculateArea,
+  calculateProjectTotal,
+  calculateTotal
 } from 'config/app.config';
 import DB, { ClientError, Response, ServerError } from 'config/db.config';
 import { ProjectModel, TaskModel, UserModel } from 'database';
@@ -46,8 +46,14 @@ import { getSession } from 'next-auth/react';
   
       
   
-      // @ts-expect-error
-      const userFound = await UserModel._findByGoogleId(user?.userId);
+      const [userFound , projectFound] = await Promise.all([
+        // @ts-expect-error
+        UserModel._findByGoogleId(user?.userId),
+        // @ts-expect-error
+        ProjectModel._findById(
+          new mongoose.Types.ObjectId(projectId)
+        )
+      ]);
   
       if (!userFound)
         throw {
@@ -55,10 +61,6 @@ import { getSession } from 'next-auth/react';
           status: 400,
         };
   
-      // @ts-expect-error
-      const projectFound = await ProjectModel._findById(
-        new mongoose.Types.ObjectId(projectId)
-      );
   
       if (!projectFound) throw { message: 'Project No Found', status: 400 };
   

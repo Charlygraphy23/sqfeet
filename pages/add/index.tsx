@@ -8,11 +8,13 @@ import {
 } from '@mui/material';
 import Button from 'components/button';
 import Footer from 'components/footer';
+import PageLoader from 'components/loader';
+import { AUTH_STATUS } from 'config/app.config';
 import { serializeToObject } from 'config/db.config';
 import { getAllProjectsByUser } from 'database/helper';
 import { Project } from 'interface';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useCallback, useState } from 'react';
 
@@ -23,6 +25,7 @@ type Props = {
 const AddProject = ({ data }: Props) => {
     const [selectedId, setSelectedId] = useState('');
     const router = useRouter();
+    const { status } = useSession();
 
     const handleNavigate = useCallback(() => {
         router.push('/create');
@@ -35,6 +38,7 @@ const AddProject = ({ data }: Props) => {
         setSelectedId(value);
     }, [router]);
 
+    if (status === AUTH_STATUS.LOADING) return <PageLoader />;
 
     return (
         <div className='addProject'>

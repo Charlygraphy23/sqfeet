@@ -12,6 +12,8 @@ export const ServerError = ({
   status: number;
 }) => {
   const error = `${message} & Status ${status}`;
+
+  // eslint-disable-next-line no-console
   console.error(error);
   return Promise.reject(error);
 };

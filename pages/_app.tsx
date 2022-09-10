@@ -28,6 +28,7 @@ const MyApp = ({
         <Layout>
           <Component {...pageProps} />
         </Layout>
+        <div className='app_toast' />
       </div>
     </SessionProvider>
   </>

@@ -21,14 +21,18 @@ const handler: NextApiHandler = async (
       status: 400,
       res,
     });
-    const { date, ratePerSqaureFt, projectId, taskList } = req.body;
-    const mongoSession = await mongoose.startSession();
-    await mongoSession.startTransaction();
+
+
+
+    await DB.connect(res);
 
     
-  try {
+    const mongoSession = await mongoose.startSession();
+    await mongoSession.withTransaction(async() => {
+      const { date, ratePerSqaureFt, projectId, taskList } = req.body;
 
-    if (!date || !ratePerSqaureFt)
+
+      if (!date || !ratePerSqaureFt)
       throw { message: 'Please provide date and square feet', status: 422 };
 
     if (!taskList.every((val: any) => val.title && val.type && projectId))
@@ -39,23 +43,24 @@ const handler: NextApiHandler = async (
 
     if (!session) throw { message: 'Un-Authorized', status: 401 };
     const { user } = session;
-    await DB.connect(res);
+   
 
     
 
-    // @ts-expect-error
-    const userFound = await UserModel._findByGoogleId(user?.userId);
+    const [userFound , projectFound] = await Promise.all([
+      // @ts-expect-error
+      UserModel._findByGoogleId(user?.userId),
+      // @ts-expect-error
+      ProjectModel._findById(
+        new mongoose.Types.ObjectId(projectId)
+      )
+    ]);
 
     if (!userFound)
       throw {
         message: 'User Not found!!',
         status: 400,
       };
-
-    // @ts-expect-error
-    const projectFound = await ProjectModel._findById(
-      new mongoose.Types.ObjectId(projectId)
-    );
 
     if (!projectFound) throw { message: 'Project No Found', status: 400 };
 
@@ -100,19 +105,20 @@ const handler: NextApiHandler = async (
       message: 'Success',
       res,
     });
-  } catch (err: any) {
 
-    await mongoSession.abortTransaction();
-    mongoSession.endSession();
 
-    await DB.disconnect();
-    ServerError({ message: err?.message, status: err?.status });
-    return ClientError({
-      message: err?.message,
-      status: err?.status,
-      res,
+    }).catch(async err => {
+      mongoSession.endSession();
+  
+      await DB.disconnect();
+      ServerError({ message: err?.message, status: err?.status });
+      return ClientError({
+        message: err?.message,
+        status: err?.status,
+        res,
+      });
     });
-  }
+
 };
 
 export default handler;

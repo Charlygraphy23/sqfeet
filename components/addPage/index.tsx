@@ -2,6 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable prettier/prettier */
 import { SelectChangeEvent } from '@mui/material';
+import { toast } from 'components/alert';
 import Button from 'components/button';
 import Calender from 'components/calender';
 import TextFields from 'components/textField';
@@ -12,8 +13,10 @@ import {
   calculateTotal
 } from 'config/app.config';
 import { AddDataType, ProjectData } from 'interface';
+import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import Lottie from 'react-lottie';
 import validator from 'validator';
 import { axiosInstance } from '_http';
 import AddDataComponent from './components/AddDataComponent';
@@ -251,10 +254,10 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
       taskList: prepareData,
       deletedTaskIds
     }).then(() => {
-      alert('Demo');
+      toast.success('Project Created!!');
     })
       .catch(err => {
-        console.error(err);
+        toast.error(err?.message);
       });
 
   }, [checkValidation, data, deletedTaskIds, id, perSquareFtRate]);
@@ -295,7 +298,11 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
         </div>
       )}
 
-      {data?.length ? <table style={{ marginLeft: 'auto' }} className='mt-1'>
+      {!data?.length && update ? <Lottie options={{
+        loop: true,
+        autoplay: true,
+        animationData: EmptyIcon
+      }} height={300} width={300} /> : <table style={{ marginLeft: 'auto' }} className='mt-1'>
         <tbody>
           {readOnly && (
             <tr>
@@ -316,7 +323,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
             <td>{totalSquareFt}</td>
           </tr>
         </tbody>
-      </table> : <p className='text-center mt-1'>No Result Found!</p>}
+      </table>}
 
       <div className='d-flex justify-content-end align-items-center mt-2 mb-1 px-1'>
         {data?.length && !readOnly ? (

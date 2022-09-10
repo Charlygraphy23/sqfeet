@@ -1,21 +1,24 @@
 /* eslint-disable prettier/prettier */
 
-import axios from 'axios';
+import { toast } from 'components/alert';
 import Button from 'components/button';
 import Footer from 'components/footer';
+import PageLoader from 'components/loader';
 import TextFields from 'components/textField';
 import { AUTH_STATUS } from 'config/app.config';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import { ChangeEvent, useCallback, useState } from 'react';
+import { axiosInstance } from '_http';
 
 const CreateProject = () => {
 
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
-    const { data, status } = useSession();
+    const { status } = useSession();
+    const router = useRouter();
 
-    console.log(data);
 
     const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
@@ -26,23 +29,23 @@ const CreateProject = () => {
         if (!name) return;
 
         setLoading(true);
-        axios.post('/api/project/create', { name }).then(() => {
+        axiosInstance.post('/project/create', { name }).then(() => {
             setName('');
             setLoading(false);
+            toast.success('Created!');
+            router.back();
         })
-            .catch((err) => {
+            .catch((err: any) => {
                 setLoading(false);
-                console.error(err);
+                toast.error(err?.message);
             });
 
 
-    }, [name]);
+    }, [name, router]);
 
 
 
-
-
-    if (status === AUTH_STATUS.LOADING) return <p>Loading</p>;
+    if (status === AUTH_STATUS.LOADING) return <PageLoader />;
 
     return (
         <div className='createProject'>
