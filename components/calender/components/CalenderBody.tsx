@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable prettier/prettier */
 import classNames from 'classnames';
 import { Calender } from 'interface';
@@ -6,7 +7,8 @@ import { memo } from 'react';
 
 type Props = {
     calender: Calender[];
-    updateDate: (date: Moment) => void;
+    // eslint-disable-next-line no-unused-vars
+    updateDate: (date: Moment, dateClicked?: boolean) => void;
 };
 
 const CalenderBody = ({ calender, updateDate }: Props) => {
@@ -15,28 +17,35 @@ const CalenderBody = ({ calender, updateDate }: Props) => {
     return (
         <div className='calender__body'>
             <div className='week__labels mb-1'>
-                {WEEKS.map((week, i) => (
+                {WEEKS.map((week, i: number) => (
                     <p key={i}>{week}</p>
                 ))}
             </div>
 
             <div className='dates'>
-                {calender.map((data, i) => (
-                    <div
-                        className='date__block mb-2'
-                        key={i}
-                        onClick={() => updateDate(data.date.clone())}
-                    >
-                        <span
-                            className={classNames('', {
-                                today: data.isToday,
-                                notCurrentMonth: !data.isCurrentMonth,
+                <>
+                    {calender.map((data, i) => (
+                        <div
+                            className={classNames('date__block mb-2', {
+                                range: !!data?.range,
+                                start: !!data?.start,
+                                end: !!data?.end
                             })}
+                            key={i}
+                            onClick={() => updateDate(data.date.clone(), true)}
                         >
-                            {data.date.get('D')}
-                        </span>
-                    </div>
-                ))}
+                            <span
+                                className={classNames('', {
+                                    today: data.isToday,
+                                    selectedDate: data.selectedDate,
+                                    notCurrentMonth: !data.isCurrentMonth,
+                                })}
+                            >
+                                {data.date.get('D')}
+                            </span>
+                        </div>
+                    ))}
+                </>
             </div>
         </div>
     );

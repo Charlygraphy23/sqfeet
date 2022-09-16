@@ -140,6 +140,14 @@ body {
   }
 }
 
+.MuiDialogContent-root {
+  div {
+    &[style*="position"] {
+      color: transparent !important;
+    }
+  }
+}
+
 @keyframes borderAnimation {
   0% {
     width: 0%;

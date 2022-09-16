@@ -3,4 +3,10 @@
     padding-bottom: $padding_bottom;
     padding-left: 10px;
     padding-right: 10px;
+
+    .graph__container {
+        background-color: transparent;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba($text_primary_color, 0.1);
+    }
 }

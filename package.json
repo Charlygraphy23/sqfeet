@@ -13,10 +13,12 @@
     "@emotion/styled": "^11.10.0",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.10.0",
+    "@mui/x-date-pickers-pro": "^5.0.1",
     "axios": "^0.27.2",
     "bootstrap-icons": "^1.9.1",
     "chart.js": "^3.9.1",
     "classnames": "^2.3.1",
+    "dayjs": "^1.11.5",
     "moment": "^2.29.4",
     "mongoose": "^6.5.3",
     "next": "12.2.3",
@@ -30,6 +32,7 @@
     "validator": "^13.7.0"
   },
   "devDependencies": {
+    "@types/chart.js": "^2.9.37",
     "@types/node": "18.0.6",
     "@types/nprogress": "^0.2.0",
     "@types/react": "18.0.15",

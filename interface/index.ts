@@ -7,6 +7,10 @@ export type Calender = {
   date: Moment;
   isCurrentMonth: boolean;
   isToday: boolean;
+  range?: boolean;
+  start?: boolean;
+  end?: boolean;
+  selectedDate?: boolean;
 };
 export type TaskData = {
   _id?: string;

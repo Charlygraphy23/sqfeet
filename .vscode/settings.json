@@ -18,10 +18,12 @@
     },
     "eslint.alwaysShowStatus": true,
     "[scss]": {
-      "editor.defaultFormatter": "sibiraj-s.vscode-scss-formatter"
+      "editor.defaultFormatter": "sibiraj-s.vscode-scss-formatter",
+      "editor.tabSize": 2
     },
     "[typescriptreact]": {
-      "editor.defaultFormatter": "vscode.typescript-language-features"
+      "editor.defaultFormatter": "vscode.typescript-language-features",
+      "editor.tabSize": 2
     },
     
   }
