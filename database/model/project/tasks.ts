@@ -56,6 +56,11 @@ const schema = new mongoose.Schema(
       ref: 'users',
     },
 
+    batchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'batches',
+    },
+
     projectId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'projects',
@@ -80,7 +85,7 @@ const schema = new mongoose.Schema(
   }
 );
 
-schema.index({ projectId: 1, createdby: 1 });
+schema.index({ projectId: 1, createdby: 1, batchId: 1 });
 
 export type TaskModelType = typeof schema;
 

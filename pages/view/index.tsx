@@ -21,6 +21,7 @@ const ViewPage = ({ data }: Props) => {
 
     const [selectedProject, setSelectedProject] = useState('');
     const [readOnly, setReadOnly] = useState(true);
+    const [readOnlyId, setReadOnlyId] = useState('');
     const { status } = useSession();
     const [loading, setLoading] = useState(false);
     const [projectData, setProjectData] = useState<ProjectData>({} as ProjectData);
@@ -28,8 +29,11 @@ const ViewPage = ({ data }: Props) => {
 
 
 
-    const handleReadOnly = useCallback(() => {
+    const handleReadOnly = useCallback((id: string) => {
+
+        if (!id) return toast.warning('Batch Id Missing!!');
         setReadOnly(prevState => !prevState);
+        setReadOnlyId(id);
     }, []);
 
 
@@ -41,7 +45,7 @@ const ViewPage = ({ data }: Props) => {
 
         setLoading(true);
         axiosInstance.post('/project/get', { projectId: selectedProject }, { signal }).then((res) => {
-
+            console.log(res?.data?.data);
             setProjectData(res?.data?.data);
             setLoading(false);
         }).catch(error => {
@@ -90,7 +94,7 @@ const ViewPage = ({ data }: Props) => {
 
 
 
-            {selectedProject && <ViewProject readOnly={readOnly} id={selectedProject} handleReadOnly={handleReadOnly} loading={loading} projectData={projectData} />}
+            {selectedProject && <ViewProject readOnly={readOnly} id={selectedProject} readOnlyId={readOnlyId} handleReadOnly={handleReadOnly} loading={loading} projectData={projectData} />}
 
 
             <Footer />
@@ -115,7 +119,7 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
     };
 
     const response = await getAllProjectsByUser({ req: context.req });
-    const data = serializeToObject<any[]>(response.data).map(_val => _val?._doc);
+    const data = serializeToObject<any[]>(response.data ?? [])?.map(_val => _val?._doc);
 
     return {
         props: {

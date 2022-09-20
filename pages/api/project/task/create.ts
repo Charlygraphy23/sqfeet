@@ -6,7 +6,7 @@ import {
   calculateTotal
 } from 'config/app.config';
 import DB, { ClientError, Response, ServerError } from 'config/db.config';
-import { ProjectModel, TaskModel, UserModel } from 'database';
+import { BatchModel, ProjectModel, TaskModel, UserModel } from 'database';
 import mongoose from 'mongoose';
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
@@ -24,15 +24,15 @@ const handler: NextApiHandler = async (
 
 
 
-    await DB.connect(res);
-
-    
-    const mongoSession = await mongoose.startSession();
-    await mongoSession.withTransaction(async() => {
-      const { date, ratePerSqaureFt, projectId, taskList } = req.body;
+  await DB.connect(res);
 
 
-      if (!date || !ratePerSqaureFt)
+  const mongoSession = await mongoose.startSession();
+  await mongoSession.withTransaction(async () => {
+    const { date, ratePerSqaureFt, projectId, taskList } = req.body;
+
+
+    if (!date || !ratePerSqaureFt)
       throw { message: 'Please provide date and square feet', status: 422 };
 
     if (!taskList.every((val: any) => val.title && val.type && projectId))
@@ -43,11 +43,11 @@ const handler: NextApiHandler = async (
 
     if (!session) throw { message: 'Un-Authorized', status: 401 };
     const { user } = session;
-   
 
-    
 
-    const [userFound , projectFound] = await Promise.all([
+
+
+    const [userFound, projectFound] = await Promise.all([
       // @ts-expect-error
       UserModel._findByGoogleId(user?.userId),
       // @ts-expect-error
@@ -85,17 +85,25 @@ const handler: NextApiHandler = async (
 
     const { price = 0, sqft = 0 } = calculateProjectTotal(updatedTaskList);
 
-    await TaskModel.create(updatedTaskList, { session: mongoSession });
+    const [batch] = await BatchModel.create([{
+      totalPrice: price,
+      totalSquareFt: sqft,
+      rateOfSquareFt: ratePerSqaureFt,
+      date,
+      projectId: projectFound?._id
+    }], { session: mongoSession });
 
-    await ProjectModel.findByIdAndUpdate(
-      { _id: projectFound?._id },
-      {
-        totalPrice: price,
-        totalSquareFt: sqft,
-        rateOfSquareFt: ratePerSqaureFt,
-      },
-      { session: mongoSession }
-    );
+    if (!batch) throw { status: 500, message: "Can't create batch" };
+
+
+    // ? Adding batchId in Each task
+    const taskListWithBatch = updatedTaskList.map((task: any) => ({
+      ...task,
+      batchId: batch?._id
+    }));
+
+
+    await TaskModel.create(taskListWithBatch, { session: mongoSession });
 
     await mongoSession.commitTransaction();
     mongoSession.endSession();
@@ -107,17 +115,17 @@ const handler: NextApiHandler = async (
     });
 
 
-    }).catch(async err => {
-      mongoSession.endSession();
-  
-      await DB.disconnect();
-      ServerError({ message: err?.message, status: err?.status });
-      return ClientError({
-        message: err?.message,
-        status: err?.status,
-        res,
-      });
+  }).catch(async err => {
+    mongoSession.endSession();
+
+    await DB.disconnect();
+    ServerError({ message: err?.message, status: err?.status });
+    return ClientError({
+      message: err?.message,
+      status: err?.status,
+      res,
     });
+  });
 
 };
 

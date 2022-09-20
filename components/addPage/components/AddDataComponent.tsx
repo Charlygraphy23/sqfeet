@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
@@ -24,10 +25,14 @@ type Props = {
     ) => void;
     handleClose: (index: number) => void
     // eslint-disable-next-line react/require-default-props
-    readOnly?: boolean
+    readOnly?: boolean,
+    // eslint-disable-next-line react/require-default-props
+    batchId?: string,
+    // eslint-disable-next-line react/require-default-props
+    readOnlyId?: string
 };
 
-const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false }: Props) => (
+const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false, batchId = '', readOnlyId = '' }: Props) => (
     <div className='addData'>
         <div className='addPage__container mt-1'>
             <div className='accordion '>
@@ -39,12 +44,12 @@ const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false }:
                             id='panel1a-header'
                             className='accordion__header'
                         >
-                            {!readOnly && <i className='bi bi-x-circle-fill close' onClick={() => handleClose(i)} />}
+                            {!readOnly && batchId && (batchId === readOnlyId) && <i className='bi bi-x-circle-fill close' onClick={() => handleClose(i)} />}
 
-                            {readOnly ?
+                            {readOnly && batchId && (batchId !== readOnlyId) ?
                                 <p className='accordion__title'> {value.title || '--'}</p>
 
-                                : <TextFields
+                                : !readOnly && (batchId === readOnlyId) ? <TextFields
                                     name='title'
                                     size='small'
                                     label='Title'
@@ -52,7 +57,7 @@ const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false }:
                                     onChange={(e) => handleChange(e, i)}
                                     error={!!value.errors?.title}
                                     helperText={value.errors?.title}
-                                />}
+                                /> : <p className='accordion__title'> {value.title || '--'}</p>}
 
                             <p className='accordion__title'>| (₹) {value?.total?.toFixed(2) || '--'}</p>
                         </AccordionSummary>
@@ -63,6 +68,8 @@ const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false }:
                                     index={i}
                                     handleChange={handleChange}
                                     readOnly={readOnly}
+                                    batchId={batchId}
+                                    readOnlyId={readOnlyId}
                                 />
                             </div>
                         </AccordionDetails>

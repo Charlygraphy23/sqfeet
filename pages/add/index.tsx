@@ -91,7 +91,7 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
     };
 
     const response = await getAllProjectsByUser({ req: context.req });
-    const data = serializeToObject<any[]>(response.data).map(_val => _val?._doc);
+    const data = serializeToObject<any[]>(response?.data ?? []).map(_val => _val?._doc);
 
     return {
         props: {

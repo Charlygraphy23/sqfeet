@@ -34,11 +34,18 @@ export interface Project {
   _id: mongoose.Types.ObjectId;
   name: string;
   createdBy: mongoose.Types.ObjectId;
+}
+
+export type Batches = {
+  tasks: TaskData[];
+  date: string;
+  projectId: string;
   rateOfSquareFt: number;
   totalPrice: number;
   totalSquareFt: number;
-}
+  _id: string;
+};
 
 export interface ProjectData extends Project {
-  tasks: TaskData[];
+  batches: Batches[];
 }

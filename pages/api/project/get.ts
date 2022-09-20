@@ -52,8 +52,8 @@ const handler: NextApiHandler = async (
 
       {
         $lookup: {
-          from: 'tasks',
-          let: { projectId: '$_id', userId: userFound?._id },
+          from: 'batches',
+          let: { projectId: '$_id' },
           pipeline: [
             {
               $match: {
@@ -62,11 +62,30 @@ const handler: NextApiHandler = async (
                 },
               },
             },
+
+            {
+              $lookup: {
+                from: 'tasks',
+                let: { batchId: '$_id' },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [{ $eq: ['$batchId', '$$batchId'] }],
+                      },
+                    },
+                  },
+                ],
+                as: 'tasks',
+              },
+            },
           ],
-          as: 'tasks',
+          as: 'batches',
         },
       },
-    ]);
+    ]).catch((err) => {
+      throw err;
+    });
 
     await DB.disconnect();
 

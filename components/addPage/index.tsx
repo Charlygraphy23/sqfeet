@@ -12,9 +12,10 @@ import {
   calculateProjectTotal,
   calculateTotal
 } from 'config/app.config';
-import { AddDataType, ProjectData } from 'interface';
+import { AddDataType, Batches } from 'interface';
 import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import Lottie from 'react-lottie';
 import validator from 'validator';
@@ -24,14 +25,17 @@ import AddDataComponent from './components/AddDataComponent';
 type Props = {
   // eslint-disable-next-line react/require-default-props
   readOnly?: boolean;
-  id: string,
-  projectData?: ProjectData,
+  batchId?: string,
+  batch?: Batches,
   hideDate?: boolean,
-  update?: boolean
+  update?: boolean,
+  projectId: string,
+  readOnlyId?: string
 };
 
-const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false, update = false }: Props) => {
+const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = false, update = false, projectId = '', readOnlyId = '' }: Props) => {
   const [date, setDate] = useState(moment().clone());
+  const router = useRouter();
   const initialState = useMemo(
     () => ({
       title: '',
@@ -221,16 +225,17 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
     axiosInstance.post('/project/task/create', {
       date: date.unix(),
       ratePerSqaureFt: perSquareFtRate,
-      projectId: id,
+      projectId,
       taskList: prepareData
     }).then(() => {
-      alert('Demo');
+      toast.success('Added SuccessFully 😀');
+      router.push(`/view/${projectId}`);
     })
       .catch(err => {
-        console.error(err);
+        toast.error(err?.message);
       });
 
-  }, [checkValidation, data, date, id, perSquareFtRate]);
+  }, [checkValidation, data, date, perSquareFtRate, projectId, router]);
 
   const handleUpdate = useCallback(() => {
     const hasError = checkValidation();
@@ -238,6 +243,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
 
 
     if (hasError) return;
+    if (!batchId) return toast.error('Missing batchId !!');
     if (!perSquareFtRate) setPerSquareFtRateError(true);
 
     const prepareData = data.map((val: any) => {
@@ -245,32 +251,35 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
       if (val?.errors)
         delete val?.errors;
 
+      val.batchId = batchId;
       return val;
     });
 
     axiosInstance.post('/project/update', {
       ratePerSqaureFt: perSquareFtRate,
-      projectId: id,
+      batchId,
       taskList: prepareData,
       deletedTaskIds
     }).then(() => {
-      toast.success('Project Created!!');
+
+      toast.success('Project Updated!!');
+      router.push(`/view/${projectId}`);
     })
       .catch(err => {
         toast.error(err?.message);
       });
 
-  }, [checkValidation, data, deletedTaskIds, id, perSquareFtRate]);
+  }, [checkValidation, data, deletedTaskIds, batchId, perSquareFtRate, projectId, router]);
 
   useEffect(() => {
-    if (!id || !projectData) return;
+    if (!batchId || !batch) return;
 
 
-    setData(projectData?.tasks);
-    setPerSquareFtRate(projectData?.rateOfSquareFt);
-    setTotalPrice(projectData?.totalPrice);
-    setTotalSquareFt(projectData?.totalSquareFt);
-  }, [id, projectData]);
+    setData(batch?.tasks);
+    setPerSquareFtRate(batch?.rateOfSquareFt);
+    setTotalPrice(batch?.totalPrice);
+    setTotalSquareFt(batch?.totalSquareFt);
+  }, [batchId, batch]);
 
   return (
     <div className='addPage__container'>
@@ -304,7 +313,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
         animationData: EmptyIcon
       }} height={300} width={300} /> : <table style={{ marginLeft: 'auto' }} className='mt-1'>
         <tbody>
-          {readOnly && (
+          {readOnly && batchId && readOnlyId === batchId && (
             <tr>
               <td>Rate per sqft (₹) : </td>
               <td>{` ${perSquareFtRate}`}</td>
@@ -326,7 +335,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
       </table>}
 
       <div className='d-flex justify-content-end align-items-center mt-2 mb-1 px-1'>
-        {data?.length && !readOnly ? (
+        {data?.length && !readOnly && batchId && (batchId === readOnlyId) ? (
           <Button
             className='submit__button mr-1'
             disabled={!data.length}
@@ -337,7 +346,7 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
         ) : (
           <div />
         )}
-        {!readOnly && (
+        {!readOnly && batchId && (batchId === readOnlyId) && (
           <Button className='add__button' onClick={handleAdd}>
             <i className='bi bi-plus' />
           </Button>
@@ -349,6 +358,8 @@ const AddPageContainer = ({ readOnly = false, id, projectData, hideDate = false,
         handleChange={handleChange}
         handleClose={handleClose}
         readOnly={readOnly}
+        batchId={batchId}
+        readOnlyId={readOnlyId}
       />
     </div>
   );

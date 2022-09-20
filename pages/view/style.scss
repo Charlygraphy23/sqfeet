@@ -46,11 +46,37 @@
         }
     }
 
-    .viewProject__container {
-        .addPage__container {
-            padding: 0px;
-            .calender__chooser {
-                margin-top: 0px;
+    .edit__data {
+        margin-top: 4rem;
+
+        .viewProject__container {
+            .addPage__container {
+                padding: 0px;
+                .calender__chooser {
+                    margin-top: 0px;
+                }
+            }
+        }
+
+        .dateDivider {
+            border-bottom: 1px solid rgba(white, 0.2);
+            position: relative;
+            margin: 0;
+            @include flexBox(flex-start, center);
+
+            span {
+                position: absolute;
+                bottom: -10px;
+                left: 20px;
+                background-color: $theme_dark_color;
+                padding-right: 0.5rem;
+            }
+
+            i::before {
+                position: absolute;
+                bottom: -4px;
+                left: 0px;
+                background-color: $theme_dark_color;
             }
         }
     }

@@ -21,7 +21,7 @@ const AddPage = () => {
             <h1 className='page_title mt-3'>Add Data</h1>
 
 
-            <AddPageContainer id={id ?? ''} />
+            <AddPageContainer projectId={id ?? ''} />
 
             <Footer />
         </div>
