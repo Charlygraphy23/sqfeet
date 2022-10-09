@@ -20,7 +20,7 @@ jobs:
         with:
           token: ${{ secrets.VERCEL_TOKEN }}
           projectName: sqfeet # project name in Vercel
-          envVariableKeys: DB_URL,CLIENT_ID,CLIENT_SECRET,AUTH_SECRET
+          envVariableKeys: DB_URL,CLIENT_ID,CLIENT_SECRET,AUTH_SECRET,BASE_URL
         env:
           DB_URL: ${{ secrets.DB_URL }}
           TARGET_DB_URL: production
@@ -34,6 +34,9 @@ jobs:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           TARGET_AUTH_SECRET: production
           TYPE_AUTH_SECRET: plain
+          BASE_URL: ${{ secrets.BASE_URL }}
+          TARGET_BASE_URL: production
+          TYPE_BASE_URL: plain
       # deploy app to vercel
       - name: deploy site to vercel
         uses: amondnet/vercel-action@v20
