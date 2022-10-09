@@ -58,7 +58,7 @@ const ViewPageById = () => {
       setLoading(false);
       controller.abort();
     };
-  }, [projectId, push, status]);
+  }, [handleReadOnly, projectId, push, status]);
 
   if (status === AUTH_STATUS.LOADING) return <PageLoader />;
 

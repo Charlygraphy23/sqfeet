@@ -139,7 +139,7 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
             default:
                 return 'Error';
         }
-    }, [value?.type, value?.width, value.errors?.width, value.errors?.length, value.errors?.diameter, value?.length, value?.diameter, readOnly, batchId, readOnlyId, handleChange, i]);
+    }, [value?.type, value?.width, value.errors?.width, value.errors?.length, value.errors?.diameter, value?.length, value?.diameter, addPage, readOnly, batchId, readOnlyId, handleChange, i]);
 
     return (
         <div className='w-100'>

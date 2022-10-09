@@ -17,7 +17,7 @@ type Props = {
 };
 
 const GraphBody = ({ date, handleDateChange, data }: Props) => {
-  const options = useMemo(
+  const options: any = useMemo(
     () => ({
       responsive: true,
       layout: {
@@ -43,7 +43,7 @@ const GraphBody = ({ date, handleDateChange, data }: Props) => {
           ticks: {
             color: 'white',
           },
-          type: 'time',
+          type: 'timeseries',
           time: {
             unit: 'day',
           },

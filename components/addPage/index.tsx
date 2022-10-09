@@ -4,7 +4,6 @@
 import { SelectChangeEvent } from '@mui/material';
 import { toast } from 'components/alert';
 import Button from 'components/button';
-import Calender from 'components/calender';
 import TextFields from 'components/textField';
 import {
   AREAS,
@@ -15,15 +14,14 @@ import {
 import { AddDataType, Batches } from 'interface';
 import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Lottie from 'react-lottie';
 import { ClockLoader, DotLoader } from 'react-spinners';
 import validator from 'validator';
 import { axiosInstance } from '_http';
 import AddDataComponent from './components/AddDataComponent';
-
-
 
 type Props = {
   // eslint-disable-next-line react/require-default-props
@@ -36,6 +34,13 @@ type Props = {
   readOnlyId?: string
   addPage?: boolean
 };
+
+
+const Calender = dynamic(
+  () => import('../calender' /* webpackChunkName: "calender" */),
+  { ssr: false }
+);
+
 
 const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = false, update = false, projectId = '', readOnlyId = '', addPage = false }: Props) => {
   const [date, setDate] = useState(moment().clone());
@@ -464,8 +469,9 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
         readOnlyId={readOnlyId}
         addPage={addPage}
       />
+
     </div>
   );
 };
 
-export default AddPageContainer;
+export default memo(AddPageContainer);

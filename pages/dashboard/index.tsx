@@ -41,8 +41,6 @@ const DashboardPage = ({ name }: Props) => {
     const { push } = useRouter();
 
     const handleDateChange = useCallback((_value: DateRange<Dayjs>) => {
-        console.log({ _value });
-
         setValue(_value);
 
     }, []);
