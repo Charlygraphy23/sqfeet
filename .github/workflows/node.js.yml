@@ -1,31 +1,45 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+name: Sqfeet CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  build:
-
+  vercel:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [14.x, 16.x, 18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - uses: actions/checkout@v2
+      #  add env file to .env.local
+
+      - name: Set Env Vars on Vercel Project
+        uses: dkershner6/vercel-set-env-action@v1
+        with:
+          token: ${{ secrets.VERCEL_TOKEN }}
+          projectName: sqfeet # project name in Vercel
+          envVariableKeys: DB_URL,CLIENT_ID,CLIENT_SECRET,AUTH_SECRET
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          TARGET_DB_URL: production
+          TYPE_DB_URL: plain
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          TARGET_CLIENT_ID: production
+          TYPE_CLIENT_ID: plain
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          TARGET_CLIENT_SECRET: production
+          TYPE_CLIENT_SECRET: plain
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          TARGET_AUTH_SECRET: production
+          TYPE_AUTH_SECRET: plain
+      # deploy app to vercel
+      - name: deploy site to vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ secrets.ORG_ID}} #Required
+          vercel-project-id: ${{ secrets.PROJECT_ID}} #Required
+          vercel-args: "--prod"
+          envVariableKeys: ""
