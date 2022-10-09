@@ -3,7 +3,7 @@ import { toast } from 'components/alert';
 import { useRouter } from 'next/router';
 
 export const axiosInstance = axios.create({
-  baseURL: `${process.env.BASE_URL}/api`,
+  baseURL: `${process.env.NEXT_PUBLIC_BASE_URL}/api`,
 });
 
 axiosInstance.interceptors.response.use(
