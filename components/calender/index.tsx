@@ -2,7 +2,7 @@
 import classNames from 'classnames';
 import useEventHandler from 'hooks/useEventHandler';
 import { Calender as CalenderInterface } from 'interface';
-import moment, { Moment } from 'moment';
+import { Moment } from 'moment';
 import {
     Dispatch,
     memo,
@@ -19,14 +19,16 @@ type Props = {
     setToday: Dispatch<SetStateAction<Moment>>;
     // eslint-disable-next-line react/require-default-props
     readOnly?: boolean;
+    taskDates: Set<string>
 };
 
-const Calender = ({ today, setToday, readOnly = false }: Props) => {
+const Calender = ({ today, setToday, readOnly = false, taskDates }: Props) => {
     const [calender, setCalender] = useState<CalenderInterface[]>([]);
     const [show, setShow, ref] = useEventHandler();
 
     const calculateDays = useCallback(() => {
-        const currentDate = moment(today).clone();
+
+        const currentDate = today.clone();
         const startDate = currentDate.clone().startOf('month').startOf('week');
         const endDate = currentDate.clone().endOf('month').endOf('week');
 
@@ -38,11 +40,12 @@ const Calender = ({ today, setToday, readOnly = false }: Props) => {
                 date: date.clone(),
                 isCurrentMonth: date.isSame(currentDate, 'month'),
                 isToday: date.isSame(currentDate, 'date'),
+                disabled: taskDates.has(date.format('YYYY-MM-DD'))
             });
             date.add(1, 'day').clone();
         }
         setCalender(_calender);
-    }, [today]);
+    }, [taskDates, today]);
 
     const updateDate = useCallback(
         (date: Moment) => {

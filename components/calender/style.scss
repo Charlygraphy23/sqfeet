@@ -114,6 +114,12 @@
                         &.today {
                             border-color: $component_color2_blue;
                         }
+
+                        &.disabled {
+                            border-color: rgba($text_primary_color, 0.3);
+                            color: rgba($text_primary_color, 0.3);
+                            pointer-events: none;
+                        }
                     }
                 }
             }

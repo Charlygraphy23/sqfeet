@@ -5,6 +5,7 @@ import { DateRange, LocalizationProvider } from '@mui/x-date-pickers-pro';
 import { AdapterDayjs } from '@mui/x-date-pickers-pro/AdapterDayjs';
 import { MobileDateRangePicker } from '@mui/x-date-pickers-pro/MobileDateRangePicker';
 import { ChartData, ScatterDataPoint } from 'chart.js';
+import 'chartjs-adapter-moment';
 import { Dayjs } from 'dayjs';
 import { useMemo } from 'react';
 import { Line } from 'react-chartjs-2';
@@ -42,9 +43,14 @@ const GraphBody = ({ date, handleDateChange, data }: Props) => {
           ticks: {
             color: 'white',
           },
+          type: 'time',
+          time: {
+            unit: 'day',
+          },
         },
 
         y: {
+          beginAtZero: true,
           grid: {
             display: false,
           },
@@ -63,7 +69,7 @@ const GraphBody = ({ date, handleDateChange, data }: Props) => {
         className='choose__date d-flex justify-content-between my-1'
         style={{ alignItems: 'center' }}
       >
-        <div className='mr-5'>Title</div>
+        <div className='mr-5 outer__label'>{data.datasets[0].label}</div>
         <LocalizationProvider
           dateAdapter={AdapterDayjs}
           localeText={{ start: 'Mobile start', end: 'Mobile end' }}

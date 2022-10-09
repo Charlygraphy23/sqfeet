@@ -30,10 +30,12 @@ type Props = {
     // eslint-disable-next-line react/require-default-props
     readOnlyId?: string,
     // eslint-disable-next-line react/require-default-props
-    batchId?: string
+    batchId?: string,
+    // eslint-disable-next-line react/require-default-props
+    addPage?: boolean
 };
 
-const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOnlyId = '', batchId = '' }: Props) => {
+const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOnlyId = '', batchId = '', addPage = false }: Props) => {
     const renderTextFieldsDependingOnAreas = useCallback(() => {
         if (!value?.type) return 'Error';
 
@@ -41,7 +43,7 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
             case AREAS.RECTANGLE:
                 return (
                     <>
-                        {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Width in ft' value={value?.width} /> : <TextFields
+                        {addPage || (!readOnly && batchId && (batchId === readOnlyId)) ? <TextFields
                             type='number'
                             name='width'
                             size='small'
@@ -52,8 +54,8 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.width}
                             helperText={value.errors?.width}
-                        />}
-                        {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Length in ft' value={value?.length} /> : <TextFields
+                        /> : <ViewOnlyFields label='Width in ft' value={value?.width} />}
+                        {addPage || (!readOnly && batchId && (batchId === readOnlyId)) ? <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -64,14 +66,14 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.length}
                             helperText={value.errors?.length}
-                        />}
+                        /> : <ViewOnlyFields label='Length in ft' value={value?.length} />}
                     </>
                 );
 
             case AREAS.SQUARE:
                 return (
                     <>
-                        {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Side Length in ft' value={value?.length} /> : <TextFields
+                        {addPage || (!readOnly && batchId && (batchId === readOnlyId)) ? <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -82,14 +84,14 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.length}
                             helperText={value.errors?.length}
-                        />}
+                        /> : <ViewOnlyFields label='Side Length in ft' value={value?.length} />}
                     </>
                 );
 
             case AREAS.CIRCLE:
                 return (
                     <>
-                        {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Diameter' value={value?.diameter} /> : <TextFields
+                        {addPage || (!readOnly && batchId && (batchId === readOnlyId)) ? <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -100,14 +102,14 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.diameter}
                             helperText={value.errors?.diameter}
-                        />}
+                        /> : <ViewOnlyFields label='Diameter' value={value?.diameter} />}
                     </>
                 );
 
             case AREAS.TRIANGLE:
                 return (
                     <>
-                        {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Base in ft' value={value?.width} /> : <TextFields
+                        {addPage || (!readOnly && batchId && (batchId === readOnlyId)) ? <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -118,8 +120,8 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.width}
                             helperText={value.errors?.width}
-                        />}
-                        {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Length in ft' value={value?.length} /> : <TextFields
+                        /> : <ViewOnlyFields label='Base in ft' value={value?.width} />}
+                        {addPage || (!readOnly && batchId && (batchId === readOnlyId)) ? <TextFields
                             type='number'
                             size='small'
                             className='mb-1'
@@ -130,7 +132,7 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                             onChange={(e) => handleChange(e, i)}
                             error={!!value.errors?.length}
                             helperText={value.errors?.length}
-                        />}
+                        /> : <ViewOnlyFields label='Length in ft' value={value?.length} />}
                     </>
                 );
 
@@ -141,9 +143,8 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
 
     return (
         <div className='w-100'>
-            {readOnly ?
-                <ViewOnlyFields label='Areas' value={value?.type} />
-                : <FormControl fullWidth className='mb-1'>
+            {!readOnly && (batchId === readOnlyId) ?
+                <FormControl fullWidth className='mb-1'>
                     <InputLabel id='demo-simple-select-helper-label'>Areas</InputLabel>
                     <Select
                         labelId='demo-simple-select-helper-label'
@@ -159,8 +160,9 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                         <MenuItem value={AREAS.TRIANGLE}>Triangle</MenuItem>
                     </Select>
                     <FormHelperText>Select Areas</FormHelperText>
-                </FormControl>}
-            {readOnly && batchId && (batchId !== readOnlyId) ? <ViewOnlyFields label='Description' value={value?.description} /> : <TextFields
+                </FormControl> : <ViewOnlyFields label='Areas' value={value?.type} />
+            }
+            {!readOnly && (batchId === readOnlyId) ? <TextFields
                 size='small'
                 className='mb-1'
                 fullWidth
@@ -171,7 +173,7 @@ const AccordionBody = ({ value, index: i, handleChange, readOnly = false, readOn
                 name='description'
                 onChange={(e) => handleChange(e, i)}
 
-            />}
+            /> : <ViewOnlyFields label='Description' value={value?.description} />}
 
             {renderTextFieldsDependingOnAreas()}
 

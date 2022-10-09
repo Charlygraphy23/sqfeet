@@ -45,7 +45,6 @@ const ViewPage = ({ data }: Props) => {
 
         setLoading(true);
         axiosInstance.post('/project/get', { projectId: selectedProject }, { signal }).then((res) => {
-            console.log(res?.data?.data);
             setProjectData(res?.data?.data);
             setLoading(false);
         }).catch(error => {

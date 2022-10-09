@@ -11,6 +11,7 @@ export type Calender = {
   start?: boolean;
   end?: boolean;
   selectedDate?: boolean;
+  disabled?: boolean;
 };
 export type TaskData = {
   _id?: string;

@@ -21,3 +21,14 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Add a request interceptor
+axios.interceptors.request.use(
+  (config) =>
+    // Do something before request is sent
+    config,
+  (error) => {
+    console.log(error);
+    return Promise.reject(error);
+  }
+);

@@ -32,13 +32,19 @@ const CalenderBody = ({ calender, updateDate }: Props) => {
                                 end: !!data?.end
                             })}
                             key={i}
-                            onClick={() => updateDate(data.date.clone(), true)}
+                            onClick={() => {
+
+                                if (data.disabled) return;
+
+                                updateDate(data.date.clone(), true);
+                            }}
                         >
                             <span
                                 className={classNames('', {
                                     today: data.isToday,
                                     selectedDate: data.selectedDate,
                                     notCurrentMonth: !data.isCurrentMonth,
+                                    disabled: data.disabled
                                 })}
                             >
                                 {data.date.get('D')}

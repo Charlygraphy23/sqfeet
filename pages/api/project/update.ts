@@ -34,7 +34,7 @@ const handler: NextApiHandler = async (
     if (!batchId || !ratePerSqaureFt)
       throw { message: 'Please provide batchId and square feet', status: 422 };
 
-    if (!taskList.every((val: any) => val?._id && val?.title && val?.type && val?.batchId))
+    if (!taskList.every((val: any) => val?.title && val?.type && val?.batchId))
       throw { message: 'Please fill all required fields', status: 422 };
 
     // check sign in
@@ -90,8 +90,21 @@ const handler: NextApiHandler = async (
       await TaskModel.deleteMany({ _id: { $in: convertedIds } }, { session: mongoSession });
     }
 
+    const taskWithoutIds = taskList.filter((task: any) => !task?._id);
+    const taskWithIds = taskList.filter((task: any) => task?._id);
 
-    await Promise.all(taskList.map(async (task: any) => TaskModel.findByIdAndUpdate({ _id: task?._id }, { ...task }, { session: mongoSession })));
+    if (taskWithoutIds.length) {
+      // ? New tasks created then create new task
+      await Promise.all(taskWithoutIds.map(async (task: any) => TaskModel.create([{ ...task }], { session: mongoSession })));
+
+    }
+
+    if (taskWithIds.length) {
+      // ? Update all other tasks
+      await Promise.all(taskWithIds.map(async (task: any) => TaskModel.findByIdAndUpdate({ _id: task?._id }, { ...task }, { session: mongoSession, upsert: true })));
+
+    }
+
 
     await BatchModel.findByIdAndUpdate(
       { _id: batchFound?._id },

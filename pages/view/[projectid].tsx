@@ -1,36 +1,40 @@
 import { toast } from 'components/alert';
+import Footer from 'components/footer';
 import PageLoader from 'components/loader';
 import ViewProject from 'components/viewProject';
 import { AUTH_STATUS } from 'config/app.config';
 import { ProjectData } from 'interface';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { getSession, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { axiosInstance } from '_http';
 
 const ViewPageById = () => {
-  const { query } = useRouter();
+  const { query, push } = useRouter();
   const [projectData, setProjectData] = useState<ProjectData>(
     {} as ProjectData
   );
   const [loading, setLoading] = useState(false);
   const [readOnly, setReadOnly] = useState(true);
   const { status } = useSession();
+  const [readOnlyId, setReadOnlyId] = useState('');
 
-  const projectId = useMemo(
-    () => (query?.projectid ? String(query?.projectid) : null),
-    [query?.projectid]
-  );
+  const projectId = query?.projectid ? String(query?.projectid) : null;
 
-  console.log({ query });
-
-  const handleReadOnly = useCallback(() => {
+  const handleReadOnly = useCallback((id: string) => {
     setReadOnly((prevState) => !prevState);
+    setReadOnlyId(id);
   }, []);
 
   useEffect(() => {
-    if (!projectId && status !== AUTH_STATUS.SUCCESS) return;
+    if (!projectId) return;
+
+    if (status === AUTH_STATUS.ERROR) {
+      push('/');
+      return;
+    }
+
+    if (status !== AUTH_STATUS.SUCCESS) return;
 
     const controller = new AbortController();
     const { signal } = controller;
@@ -41,18 +45,20 @@ const ViewPageById = () => {
       .then((res) => {
         setProjectData(res?.data?.data);
         setLoading(false);
+        handleReadOnly('');
       })
       .catch((error) => {
-        toast.error(error?.message);
-        setLoading(false);
-        console.error(error);
+        if (error.response) {
+          toast.error(error?.message);
+          setLoading(false);
+        }
       });
 
     return () => {
       setLoading(false);
       controller.abort();
     };
-  }, [projectId, status]);
+  }, [projectId, push, status]);
 
   if (status === AUTH_STATUS.LOADING) return <PageLoader />;
 
@@ -66,37 +72,12 @@ const ViewPageById = () => {
         handleReadOnly={handleReadOnly}
         loading={loading}
         projectData={projectData}
+        readOnlyId={readOnlyId}
       />
+
+      <Footer />
     </div>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (
-  context: GetServerSidePropsContext
-) => {
-  const { req, params = {} } = context;
-
-  if (!params?.projectid) {
-    console.log('Invalid!!!');
-  }
-
-  const session = await getSession({ req });
-
-  // ? if not authorized
-  if (!session)
-    return {
-      props: {
-        data: [],
-      },
-      redirect: {
-        destination: '/',
-        statusCode: '301',
-      },
-    };
-
-  return {
-    props: {},
-  };
 };
 
 export default ViewPageById;

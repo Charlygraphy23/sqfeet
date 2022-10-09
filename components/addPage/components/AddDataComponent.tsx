@@ -29,10 +29,12 @@ type Props = {
     // eslint-disable-next-line react/require-default-props
     batchId?: string,
     // eslint-disable-next-line react/require-default-props
-    readOnlyId?: string
+    readOnlyId?: string,
+    // eslint-disable-next-line react/require-default-props
+    addPage?: boolean
 };
 
-const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false, batchId = '', readOnlyId = '' }: Props) => (
+const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false, batchId = '', readOnlyId = '', addPage = false }: Props) => (
     <div className='addData'>
         <div className='addPage__container mt-1'>
             <div className='accordion '>
@@ -70,6 +72,7 @@ const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false, b
                                     readOnly={readOnly}
                                     batchId={batchId}
                                     readOnlyId={readOnlyId}
+                                    addPage={addPage}
                                 />
                             </div>
                         </AccordionDetails>

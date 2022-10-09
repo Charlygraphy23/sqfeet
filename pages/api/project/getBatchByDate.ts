@@ -1,6 +1,6 @@
 /* eslint-disable no-throw-literal */
 import DB, { ClientError, Response, ServerError } from 'config/db.config';
-import { ProjectModel, UserModel } from 'database';
+import { BatchModel } from 'database';
 import mongoose from 'mongoose';
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
@@ -25,7 +25,6 @@ const handler: NextApiHandler = async (
     });
 
     if (!session) throw { message: 'Un-Authorized', status: 401 };
-    const { user } = session;
 
     if (!projectId) throw { message: 'Please provide project id', status: 422 };
 
@@ -33,62 +32,35 @@ const handler: NextApiHandler = async (
       throw err;
     });
 
-    // @ts-expect-error
-    const userFound = await UserModel._findByGoogleId(user?.userId).catch(
-      (err: any) => {
-        throw err;
-      }
-    );
-
-    if (!userFound)
-      throw {
-        message: 'User Not found!!',
-        status: 400,
-      };
-
-    const projectData = await ProjectModel.aggregate([
+    const batchDates = await BatchModel.aggregate([
       {
         $match: {
           $expr: {
             $and: [
-              { $eq: ['$_id', new mongoose.Types.ObjectId(projectId)] },
-              { $eq: ['$createdBy', userFound?._id] },
+              { $eq: ['$projectId', new mongoose.Types.ObjectId(projectId)] },
             ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          dateInMilis: {
+            $toDate: { $toLong: { $multiply: ['$date', 1000] } },
           },
         },
       },
 
       {
-        $lookup: {
-          from: 'batches',
-          let: { projectId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [{ $eq: ['$projectId', '$$projectId'] }],
-                },
-              },
+        $project: {
+          date: {
+            $dateToString: {
+              date: '$dateInMilis',
+              timezone: '+0530',
+              format: '%Y-%m-%d',
             },
-
-            {
-              $lookup: {
-                from: 'tasks',
-                let: { batchId: '$_id' },
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: {
-                        $and: [{ $eq: ['$batchId', '$$batchId'] }],
-                      },
-                    },
-                  },
-                ],
-                as: 'tasks',
-              },
-            },
-          ],
-          as: 'batches',
+          },
+          _id: '$_id',
+          projectId: '$projectId',
         },
       },
     ]).catch((err) => {
@@ -102,7 +74,7 @@ const handler: NextApiHandler = async (
     return Response({
       message: 'Success',
       res,
-      data: projectData?.[0] ?? [],
+      data: batchDates ?? [],
     });
   } catch (err: any) {
     await DB.disconnect();

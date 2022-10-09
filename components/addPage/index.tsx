@@ -18,9 +18,12 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import Lottie from 'react-lottie';
+import { ClockLoader, DotLoader } from 'react-spinners';
 import validator from 'validator';
 import { axiosInstance } from '_http';
 import AddDataComponent from './components/AddDataComponent';
+
+
 
 type Props = {
   // eslint-disable-next-line react/require-default-props
@@ -31,9 +34,10 @@ type Props = {
   update?: boolean,
   projectId: string,
   readOnlyId?: string
+  addPage?: boolean
 };
 
-const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = false, update = false, projectId = '', readOnlyId = '' }: Props) => {
+const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = false, update = false, projectId = '', readOnlyId = '', addPage = false }: Props) => {
   const [date, setDate] = useState(moment().clone());
   const router = useRouter();
   const initialState = useMemo(
@@ -54,6 +58,9 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
   const [totalPrice, setTotalPrice] = useState(0.0);
   const [totalSquareFt, setTotalSquareFt] = useState(0.0);
   const [deletedTaskIds, setDeletedTaskIds] = useState<string[]>([]);
+  const [taskDates, setTaskDates] = useState<Set<string>>(new Set());
+  const [taskDateLoading, setTaskDateLoading] = useState(true);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const calculateTotalOverall = useCallback((_data: AddDataType[]) => {
     const { price = 0, sqft = 0 } = calculateProjectTotal(_data);
@@ -141,14 +148,44 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
   }, [initialState]);
 
   const handleClose = useCallback((index: number) => {
-    setData((prevState) => prevState.filter((_, i) => i !== index));
+
+    const _data = Array.from(data);
+
+    const filteredData = _data.filter((_, i) => i !== index);
+
+    const updatedData = filteredData.map((val) => {
+      let currentVal = val;
+
+      const _cal = {
+        ...currentVal,
+        type: currentVal?.type || AREAS.RECTANGLE,
+      };
+
+      const area = calculateArea(_cal);
+      const total = calculateTotal({
+        area: +area,
+        perSquareFtRate,
+      });
+      currentVal = {
+        ...currentVal,
+        sq: +area,
+        total,
+      };
+
+      return currentVal;
+
+    });
+
+    calculateTotalOverall(updatedData);
+    setData(updatedData);
 
     if (!update) return;
     const taskId = data[index]?._id;
     if (!taskId) return;
     setDeletedTaskIds(prevState => [...prevState, taskId]);
 
-  }, [data, update]);
+
+  }, [calculateTotalOverall, data, perSquareFtRate, update]);
 
   const checkValidation = useCallback(() => {
     let flag = false;
@@ -221,7 +258,7 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
       return val;
     });
 
-
+    setSubmitLoading(true);
     axiosInstance.post('/project/task/create', {
       date: date.unix(),
       ratePerSqaureFt: perSquareFtRate,
@@ -229,10 +266,11 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
       taskList: prepareData
     }).then(() => {
       toast.success('Added SuccessFully 😀');
-      router.push(`/view/${projectId}`);
+      setTimeout(() => router.push(`/view/${projectId}`), 1000);
     })
       .catch(err => {
         toast.error(err?.message);
+        setSubmitLoading(false);
       });
 
   }, [checkValidation, data, date, perSquareFtRate, projectId, router]);
@@ -254,6 +292,7 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
       val.batchId = batchId;
       return val;
     });
+    setSubmitLoading(true);
 
     axiosInstance.post('/project/update', {
       ratePerSqaureFt: perSquareFtRate,
@@ -263,13 +302,47 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
     }).then(() => {
 
       toast.success('Project Updated!!');
-      router.push(`/view/${projectId}`);
+
+      setTimeout(() => router.push(`/view/${projectId}`), 1000);
+
+
     })
       .catch(err => {
         toast.error(err?.message);
+        setSubmitLoading(false);
+
       });
 
   }, [checkValidation, data, deletedTaskIds, batchId, perSquareFtRate, projectId, router]);
+
+  const getAllBatches = useCallback(async (signal: AbortSignal) => {
+    setTaskDateLoading(true);
+    axiosInstance
+      .post('/project/getBatchByDate', { projectId }, { signal })
+      .then(({ data: _data }: { data: any }) => {
+        const dates = _data?.data?.map((_v: any) => _v?.date ?? '') ?? [];
+        const dateSets = new Set<string>(dates);
+
+        let _today = moment().clone();
+        while (dateSets.has(_today.format('YYYY-MM-DD'))) {
+          _today = _today.add(1, 'day').clone();
+        }
+
+        setTaskDates(dateSets);
+        setDate(_today);
+        setTaskDateLoading(false);
+      })
+      .catch((error) => {
+        if (error.response) {
+          toast.error(error?.message);
+          setTaskDateLoading(false);
+
+        }
+
+      });
+
+
+  }, [projectId]);
 
   useEffect(() => {
     if (!batchId || !batch) return;
@@ -281,76 +354,105 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
     setTotalSquareFt(batch?.totalSquareFt);
   }, [batchId, batch]);
 
+
+  useEffect(() => {
+    setTaskDateLoading(true);
+    if (batchId) return;
+
+    const abortController = new AbortController();
+    const { signal } = abortController;
+
+
+    getAllBatches(signal);
+
+
+    return () => {
+      abortController.abort();
+    };
+  }, [batchId, getAllBatches]);
+
   return (
     <div className='addPage__container'>
+      {submitLoading && <div className='submitLoading'>
+        <DotLoader color='white' size={20} />
+
+      </div>}
       {!hideDate && <div className='calender__chooser'>
         <p>Choose Date :</p>
 
         <div>
-          <Calender setToday={setDate} today={date} readOnly={readOnly} />
+
+          {taskDateLoading
+            ? <ClockLoader color='white' size={25} />
+            : <Calender setToday={setDate} today={date} readOnly={readOnly} taskDates={taskDates} />}
         </div>
       </div>}
 
-      {!readOnly && (
-        <div className='customTextField mt-1'>
-          <TextFields
-            type='number'
-            fullWidth
-            label='Rate per sqft'
-            adornments
-            prefix='₹'
-            error={perSquareFtRateError}
-            value={perSquareFtRate}
-            onChange={handleSquareFtRateChange}
-            helperText='Required'
-          />
-        </div>
-      )}
+      {(!readOnly && addPage) || (!readOnly && readOnlyId === batchId)
+        ? (
+          <div className='customTextField mt-1'>
+            <TextFields
+              type='number'
+              fullWidth
+              label='Rate per sqft'
+              adornments
+              prefix='₹'
+              error={perSquareFtRateError}
+              value={perSquareFtRate}
+              onChange={handleSquareFtRateChange}
+              helperText='Required'
+            />
+          </div>
+        ) : ''}
 
       {!data?.length && update ? <Lottie options={{
         loop: true,
         autoplay: true,
         animationData: EmptyIcon
-      }} height={300} width={300} /> : <table style={{ marginLeft: 'auto' }} className='mt-1'>
-        <tbody>
-          {readOnly && batchId && readOnlyId === batchId && (
+      }} height={300} width={300} />
+        : <table style={{ marginLeft: 'auto' }} className='mt-1'>
+          <tbody>
+            {(!readOnly && readOnlyId !== batchId) || readOnly
+              ? (
+                <tr>
+                  <td>Rate per sqft (₹) : </td>
+                  <td>{` ${perSquareFtRate}`}</td>
+                </tr>
+              ) : ''}
+
             <tr>
-              <td>Rate per sqft (₹) : </td>
-              <td>{` ${perSquareFtRate}`}</td>
+              <td>Total (₹) : </td>
+              <td>{` ${totalPrice?.toFixed(2)}`}</td>
             </tr>
-          )}
 
-          <tr>
-            <td>Total (₹) : </td>
-            <td>{` ${totalPrice?.toFixed(2)}`}</td>
-          </tr>
-
-          <tr>
-            <td>
-              Total ft<sup>2</sup> :
-            </td>
-            <td>{totalSquareFt}</td>
-          </tr>
-        </tbody>
-      </table>}
+            <tr>
+              <td>
+                Total ft<sup>2</sup> :
+              </td>
+              <td>{totalSquareFt.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>}
 
       <div className='d-flex justify-content-end align-items-center mt-2 mb-1 px-1'>
-        {data?.length && !readOnly && batchId && (batchId === readOnlyId) ? (
-          <Button
-            className='submit__button mr-1'
-            disabled={!data.length}
-            onClick={update ? handleUpdate : handleSubmit}
-          >
-            <i className='bi bi-check-lg' />
-          </Button>
-        ) : (
-          <div />
-        )}
-        {!readOnly && batchId && (batchId === readOnlyId) && (
-          <Button className='add__button' onClick={handleAdd}>
-            <i className='bi bi-plus' />
-          </Button>
-        )}
+        {(addPage && data.length) || (data?.length && !readOnly && batchId && (batchId === readOnlyId))
+          ? (
+            <Button
+              className='submit__button mr-1'
+              disabled={!data.length}
+              onClick={update ? handleUpdate : handleSubmit}
+            >
+              <i className='bi bi-check-lg' />
+            </Button>
+          ) : (
+            <div />
+          )}
+        {addPage || (!readOnly && batchId && (batchId === readOnlyId))
+          ? (
+            <Button className='add__button' onClick={handleAdd}>
+              <i className='bi bi-plus' />
+            </Button>
+          ) : ''}
       </div>
 
       <AddDataComponent
@@ -360,6 +462,7 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
         readOnly={readOnly}
         batchId={batchId}
         readOnlyId={readOnlyId}
+        addPage={addPage}
       />
     </div>
   );
