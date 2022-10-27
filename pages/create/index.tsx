@@ -3,14 +3,17 @@
 import { toast } from 'components/alert';
 import Button from 'components/button';
 import Footer from 'components/footer';
-import PageLoader from 'components/loader';
-import TextFields from 'components/textField';
 import { AUTH_STATUS } from 'config/app.config';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { ChangeEvent, useCallback, useState } from 'react';
+import { ChangeEvent, Suspense, useCallback, useState } from 'react';
 import { axiosInstance } from '_http';
+
+const PageLoader = dynamic(() => import('../../components/loader'), { ssr: true, suspense: true });
+const TextFields = dynamic(() => import('components/textField'), { ssr: true, suspense: true });
+
 
 const CreateProject = () => {
 
@@ -45,13 +48,18 @@ const CreateProject = () => {
 
 
 
-    if (status === AUTH_STATUS.LOADING) return <PageLoader />;
+    if (status === AUTH_STATUS.LOADING)
+        return <Suspense fallback={<PageLoader bootstrap />}>
+            <PageLoader />
+        </Suspense>;
 
     return (
         <div className='createProject'>
             <h1 className='page_title mt-3 mb-2'>Create Project</h1>
 
-            <TextFields fullWidth label='Name of the project' className='mb-3' value={name} onChange={handleChange} />
+            <Suspense fallback={<PageLoader bootstrap />}>
+                <TextFields fullWidth label='Name of the project' className='mb-3' value={name} onChange={handleChange} />
+            </Suspense>
 
             <Button loaderColor='white' className='submit__button' value='Submit' onClick={handleProject} loading={loading} />
 

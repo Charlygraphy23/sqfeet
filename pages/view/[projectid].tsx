@@ -1,25 +1,31 @@
-import { toast } from 'components/alert';
 import Footer from 'components/footer';
-import PageLoader from 'components/loader';
 import ViewProject from 'components/viewProject';
 import { AUTH_STATUS } from 'config/app.config';
 import { ProjectData } from 'interface';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { getProject } from 'query/useProjects';
 import { useCallback, useEffect, useState } from 'react';
-import { axiosInstance } from '_http';
+
+const PageLoader = dynamic(() => import('components/loader'), {
+  ssr: false,
+  suspense: true,
+});
 
 const ViewPageById = () => {
   const { query, push } = useRouter();
   const [projectData, setProjectData] = useState<ProjectData>(
     {} as ProjectData
   );
-  const [loading, setLoading] = useState(false);
+
   const [readOnly, setReadOnly] = useState(true);
   const { status } = useSession();
   const [readOnlyId, setReadOnlyId] = useState('');
 
-  const projectId = query?.projectid ? String(query?.projectid) : null;
+  const projectId = query?.projectid ? String(query?.projectid) : '';
+
+  const { isLoading, data, isFetched } = getProject({ id: projectId, status });
 
   const handleReadOnly = useCallback((id: string) => {
     setReadOnly((prevState) => !prevState);
@@ -31,50 +37,28 @@ const ViewPageById = () => {
 
     if (status === AUTH_STATUS.ERROR) {
       push('/');
-      return;
     }
 
-    if (status !== AUTH_STATUS.SUCCESS) return;
+    if (data?.data?.data) {
+      setProjectData(data?.data?.data);
+      handleReadOnly('');
+    }
+  }, [handleReadOnly, data, projectId, status, push]);
 
-    const controller = new AbortController();
-    const { signal } = controller;
-
-    setLoading(true);
-    axiosInstance
-      .post('/project/get', { projectId }, { signal })
-      .then((res) => {
-        setProjectData(res?.data?.data);
-        setLoading(false);
-        handleReadOnly('');
-      })
-      .catch((error) => {
-        if (error.response) {
-          toast.error(error?.message);
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      setLoading(false);
-      controller.abort();
-    };
-  }, [handleReadOnly, projectId, push, status]);
-
-  if (status === AUTH_STATUS.LOADING) return <PageLoader />;
+  if (status === AUTH_STATUS.LOADING) return <PageLoader bootstrap />;
 
   return (
     <div className='viewProject'>
       <h1 className='page_title mt-3 mb-2'>View/Edit Project</h1>
-
       <ViewProject
         readOnly={readOnly}
         id={projectId ?? ''}
         handleReadOnly={handleReadOnly}
-        loading={loading}
+        loading={isLoading}
+        isDataFetched={isFetched}
         projectData={projectData}
         readOnlyId={readOnlyId}
       />
-
       <Footer />
     </div>
   );

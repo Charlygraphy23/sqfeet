@@ -4,21 +4,25 @@
 import { DateRange } from '@mui/x-date-pickers-pro/DateRangePicker';
 import 'chart.js/auto';
 import { toast } from 'components/alert';
-import GraphBody from 'components/dashboard';
 import Footer from 'components/footer';
-import PageLoader from 'components/loader';
 import { AUTH_STATUS } from 'config/app.config';
 import dayjs, { Dayjs } from 'dayjs';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { DotLoader } from 'react-spinners';
 import { axiosInstance } from '_http';
 
 type Props = {
     name: string
 }
+
+const PageLoader = dynamic(() => import('components/loader'), { ssr: false, suspense: true });
+const GraphBody = dynamic(() => import('components/dashboard'), { ssr: false, suspense: true });
+
+
 
 const DashboardPage = ({ name }: Props) => {
     const [loading, setLoading] = useState(false);
@@ -140,7 +144,10 @@ const DashboardPage = ({ name }: Props) => {
 
 
 
-    if (status === AUTH_STATUS.LOADING) return <PageLoader />;
+    if (status === AUTH_STATUS.LOADING)
+        return <Suspense fallback={<PageLoader bootstrap />}>
+            <PageLoader />
+        </Suspense>;
 
     return (
         <section className='dashboard'>
@@ -148,7 +155,9 @@ const DashboardPage = ({ name }: Props) => {
             <div className='row m-0 col-12 graph__container'>
                 {loading && <div className='dashboard__loading'><DotLoader color='white' size={25} /> </div>}
                 <div className='col-12'>
-                    <GraphBody data={data} handleDateChange={handleDateChange} date={value} />
+                    <Suspense fallback={<PageLoader bootstrap />}>
+                        <GraphBody data={data} handleDateChange={handleDateChange} date={value} />
+                    </Suspense>
                 </div>
             </div>
             <Footer />

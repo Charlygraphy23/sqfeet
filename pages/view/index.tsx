@@ -1,31 +1,35 @@
 /* eslint-disable prettier/prettier */
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { toast } from 'components/alert';
 import Footer from 'components/footer';
-import PageLoader from 'components/loader';
-import ViewProject from 'components/viewProject';
 import { AUTH_STATUS } from 'config/app.config';
-import { serializeToObject } from 'config/db.config';
-import { getAllProjectsByUser } from 'database/helper';
-import { ProjectData } from 'interface';
+import { Project, ProjectData } from 'interface';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
-import { useCallback, useEffect, useState } from 'react';
-import { axiosInstance } from '_http';
+import dynamic from 'next/dynamic';
+import useProjects, { getProject } from 'query/useProjects';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 
-type Props = {
-    data: any[]
-}
 
-const ViewPage = ({ data }: Props) => {
+
+const PageLoader = dynamic(() => import('components/loader'), { ssr: false, suspense: true });
+const ViewProject = dynamic(() => import('components/viewProject'), { ssr: false, suspense: true });
+
+
+
+const ViewPage = () => {
 
     const [selectedProject, setSelectedProject] = useState('');
     const [readOnly, setReadOnly] = useState(true);
     const [readOnlyId, setReadOnlyId] = useState('');
     const { status } = useSession();
-    const [loading, setLoading] = useState(false);
-    const [projectData, setProjectData] = useState<ProjectData>({} as ProjectData);
-
+    const { isLoading: isDataLoading, data: projectData, isFetched: isDataFetched } = getProject({ status, id: selectedProject });
+    const { isLoading, data, isFetched, } = useProjects({ status });
+    const listOfProjects = useMemo(() => data?.data?.data as Project[] ?? [], [data]);
+    const _projectData = useMemo(() => projectData?.data?.data as ProjectData, [projectData]);
 
 
 
@@ -37,31 +41,11 @@ const ViewPage = ({ data }: Props) => {
     }, []);
 
 
-    useEffect(() => {
-        if (!selectedProject) return;
 
-        const controller = new AbortController();
-        const { signal } = controller;
-
-        setLoading(true);
-        axiosInstance.post('/project/get', { projectId: selectedProject }, { signal }).then((res) => {
-            setProjectData(res?.data?.data);
-            setLoading(false);
-        }).catch(error => {
-            toast.error(error?.message);
-            setLoading(false);
-        });
-
-
-        return () => {
-            setLoading(false);
-            controller.abort();
-        };
-
-    }, [selectedProject]);
-
-
-    if (status === AUTH_STATUS.LOADING) return <PageLoader />;
+    if (status === AUTH_STATUS.LOADING)
+        return <Suspense fallback={<PageLoader bootstrap />}>
+            <PageLoader />
+        </Suspense>;
 
     return (
         <div className='viewProject'>
@@ -83,7 +67,10 @@ const ViewPage = ({ data }: Props) => {
                         <MenuItem value=''>
                             <em>None</em>
                         </MenuItem>
-                        {data.length && data?.map((val) => <MenuItem key={val?._id} value={val?._id}>{val?.name}</MenuItem>)}
+
+                        {isLoading && !isFetched && <PageLoader bootstrap />}
+
+                        {!isLoading && isFetched && listOfProjects.length && listOfProjects?.map((val) => <MenuItem key={val?._id.toString()} value={val?._id.toString()}>{val?.name}</MenuItem>)}
 
 
                     </Select>
@@ -92,9 +79,9 @@ const ViewPage = ({ data }: Props) => {
 
 
 
-
-            {selectedProject && <ViewProject readOnly={readOnly} id={selectedProject} readOnlyId={readOnlyId} handleReadOnly={handleReadOnly} loading={loading} projectData={projectData} />}
-
+            <Suspense fallback={<PageLoader bootstrap />}>
+                {selectedProject && <ViewProject readOnly={readOnly} id={selectedProject} readOnlyId={readOnlyId} handleReadOnly={handleReadOnly} loading={isDataLoading} projectData={_projectData} isDataFetched={isDataFetched} />}
+            </Suspense>
 
             <Footer />
         </div>
@@ -117,12 +104,10 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
         }
     };
 
-    const response = await getAllProjectsByUser({ req: context.req });
-    const data = serializeToObject<any[]>(response.data ?? [])?.map(_val => _val?._doc);
 
     return {
         props: {
-            data
+
         }
     };
 };

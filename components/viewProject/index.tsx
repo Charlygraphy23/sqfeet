@@ -1,13 +1,13 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-unused-vars */
-import AddPageContainer from 'components/addPage';
 import Button from 'components/button';
 import { AUTH_STATUS } from 'config/app.config';
 import { ProjectData } from 'interface';
 import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
 import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import Lottie from 'react-lottie';
 import ClipLoader from 'react-spinners/ClipLoader';
 
@@ -20,17 +20,22 @@ type Props = {
     projectData: ProjectData,
     loading: boolean,
     readOnlyId?: string
+    isDataFetched: boolean
 }
-const ViewProject = ({ readOnly = false, id, handleReadOnly, loading, projectData, readOnlyId = '' }: Props) => {
+
+const AddPageContainer = dynamic(() => import('components/addPage'), { ssr: false, suspense: true });
+
+
+const ViewProject = ({ isDataFetched = false, readOnly = false, id, handleReadOnly, loading, projectData, readOnlyId = '' }: Props) => {
 
     const { status } = useSession();
 
     return (
         <>
-            {(loading || status === AUTH_STATUS.LOADING) ?
+            {(loading || status === AUTH_STATUS.LOADING) && !isDataFetched ?
                 <ClipLoader color='#ffffff' loading={loading} cssOverride={{ margin: '20px auto ', display: 'flex' }} size={30} />
                 : <div className='mt-2'>
-                    {projectData?.batches?.length ?
+                    {projectData?.batches?.length > 0 ?
                         projectData?.batches?.map((batch) =>
                             <div className='edit__data' key={batch._id}>
 
@@ -43,7 +48,6 @@ const ViewProject = ({ readOnly = false, id, handleReadOnly, loading, projectDat
                                 <div className='viewProject__container mt-1'>
                                     <div className='addPage p-0'>
                                         <div className='addPage__container p-0'>
-
                                             <AddPageContainer readOnly={readOnly} batchId={batch._id} batch={batch} hideDate update projectId={projectData?._id.toString()} readOnlyId={readOnlyId} />
                                         </div>
                                     </div>

@@ -22,7 +22,7 @@ const Footer = () => {
     return (
         <ul className='footer'>
             <li>
-                <Link href='/dashboard'>
+                <Link href='/dashboard' prefetch={false}>
                     <a
                         className={classNames('fl__link', {
                             active: isDashboardActive,
@@ -38,7 +38,7 @@ const Footer = () => {
             </li>
 
             <li>
-                <Link href='/add'>
+                <Link href='/add' prefetch={false}>
                     <a
                         className={classNames('fl__link main', {
                             active: isAddActive,
@@ -50,7 +50,7 @@ const Footer = () => {
             </li>
 
             <li>
-                <Link href='/view'>
+                <Link href='/view' prefetch={false}>
                     <a
                         className={classNames('fl__link', {
                             active: isProfileActive,

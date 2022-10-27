@@ -2,8 +2,10 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable prettier/prettier */
 import { SelectChangeEvent } from '@mui/material';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'components/alert';
 import Button from 'components/button';
+import PageLoader from 'components/loader';
 import TextFields from 'components/textField';
 import {
   AREAS,
@@ -16,12 +18,11 @@ import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { ChangeEvent, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Lottie from 'react-lottie';
 import { ClockLoader, DotLoader } from 'react-spinners';
 import validator from 'validator';
 import { axiosInstance } from '_http';
-import AddDataComponent from './components/AddDataComponent';
 
 type Props = {
   // eslint-disable-next-line react/require-default-props
@@ -38,7 +39,12 @@ type Props = {
 
 const Calender = dynamic(
   () => import('../calender' /* webpackChunkName: "calender" */),
-  { ssr: false }
+  { ssr: false, suspense: true }
+);
+
+const AddDataComponent = dynamic(
+  () => import('./components/AddDataComponent' /* webpackChunkName: "AddDataComponent" */),
+  { ssr: false, suspense: true }
 );
 
 
@@ -64,8 +70,11 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
   const [totalSquareFt, setTotalSquareFt] = useState(0.0);
   const [deletedTaskIds, setDeletedTaskIds] = useState<string[]>([]);
   const [taskDates, setTaskDates] = useState<Set<string>>(new Set());
-  const [taskDateLoading, setTaskDateLoading] = useState(true);
-  const [submitLoading, setSubmitLoading] = useState(false);
+
+  // React Query
+  const updateTasks = useMutation((payload: any) => axiosInstance.post('/project/update', payload));
+  const createTasks = useMutation((payload: any) => axiosInstance.post('/project/task/create', payload));
+
 
   const calculateTotalOverall = useCallback((_data: AddDataType[]) => {
     const { price = 0, sqft = 0 } = calculateProjectTotal(_data);
@@ -73,6 +82,33 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
     setTotalPrice(price);
     setTotalSquareFt(sqft);
   }, []);
+
+  const fetchAllProject = useCallback(
+    async () => {
+
+
+      const { data: _data } = await axiosInstance.post('/project/getBatchByDate', { projectId });
+
+      const dates = _data?.data?.map((_v: any) => _v?.date ?? '') ?? [];
+      const dateSets = new Set<string>(dates);
+
+      let _today = moment().clone();
+      while (dateSets.has(_today.format('YYYY-MM-DD'))) {
+        _today = _today.add(1, 'day').clone();
+      }
+
+      setTaskDates(dateSets);
+      setDate(_today);
+
+      return data;
+    },
+    [data, projectId]
+  );
+
+  const { isLoading: taskDateLoading, isFetched: taskDateLoaded } = useQuery(['data', projectId], fetchAllProject, {
+    enabled: !!projectId,
+  });
+
 
   const calculateSquareFt = useCallback(
     (_data: AddDataType[], i: number, psft?: number) => {
@@ -263,8 +299,8 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
       return val;
     });
 
-    setSubmitLoading(true);
-    axiosInstance.post('/project/task/create', {
+
+    createTasks.mutateAsync({
       date: date.unix(),
       ratePerSqaureFt: perSquareFtRate,
       projectId,
@@ -275,10 +311,9 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
     })
       .catch(err => {
         toast.error(err?.message);
-        setSubmitLoading(false);
       });
 
-  }, [checkValidation, data, date, perSquareFtRate, projectId, router]);
+  }, [checkValidation, createTasks, data, date, perSquareFtRate, projectId, router]);
 
   const handleUpdate = useCallback(() => {
     const hasError = checkValidation();
@@ -297,57 +332,24 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
       val.batchId = batchId;
       return val;
     });
-    setSubmitLoading(true);
 
-    axiosInstance.post('/project/update', {
+    updateTasks.mutateAsync({
       ratePerSqaureFt: perSquareFtRate,
       batchId,
       taskList: prepareData,
       deletedTaskIds
-    }).then(() => {
-
-      toast.success('Project Updated!!');
-
-      setTimeout(() => router.push(`/view/${projectId}`), 1000);
-
-
     })
-      .catch(err => {
-        toast.error(err?.message);
-        setSubmitLoading(false);
+      .then(() => {
+        toast.success('Project Updated!!');
+        setTimeout(() => router.push(`/view/${projectId}`), 1000);
 
-      });
-
-  }, [checkValidation, data, deletedTaskIds, batchId, perSquareFtRate, projectId, router]);
-
-  const getAllBatches = useCallback(async (signal: AbortSignal) => {
-    setTaskDateLoading(true);
-    axiosInstance
-      .post('/project/getBatchByDate', { projectId }, { signal })
-      .then(({ data: _data }: { data: any }) => {
-        const dates = _data?.data?.map((_v: any) => _v?.date ?? '') ?? [];
-        const dateSets = new Set<string>(dates);
-
-        let _today = moment().clone();
-        while (dateSets.has(_today.format('YYYY-MM-DD'))) {
-          _today = _today.add(1, 'day').clone();
-        }
-
-        setTaskDates(dateSets);
-        setDate(_today);
-        setTaskDateLoading(false);
       })
-      .catch((error) => {
-        if (error.response) {
-          toast.error(error?.message);
-          setTaskDateLoading(false);
-
-        }
-
+      .catch((err: any) => {
+        toast.error(err?.message);
       });
 
+  }, [checkValidation, batchId, perSquareFtRate, data, updateTasks, deletedTaskIds, router, projectId]);
 
-  }, [projectId]);
 
   useEffect(() => {
     if (!batchId || !batch) return;
@@ -360,25 +362,9 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
   }, [batchId, batch]);
 
 
-  useEffect(() => {
-    setTaskDateLoading(true);
-    if (batchId) return;
-
-    const abortController = new AbortController();
-    const { signal } = abortController;
-
-
-    getAllBatches(signal);
-
-
-    return () => {
-      abortController.abort();
-    };
-  }, [batchId, getAllBatches]);
-
   return (
     <div className='addPage__container'>
-      {submitLoading && <div className='submitLoading'>
+      {(createTasks.isLoading || updateTasks.isLoading) && <div className='submitLoading'>
         <DotLoader color='white' size={20} />
 
       </div>}
@@ -387,9 +373,11 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
 
         <div>
 
-          {taskDateLoading
+          {taskDateLoading && !taskDateLoaded
             ? <ClockLoader color='white' size={25} />
-            : <Calender setToday={setDate} today={date} readOnly={readOnly} taskDates={taskDates} />}
+            : <Suspense fallback={<PageLoader bootstrap />}>
+              <Calender setToday={setDate} today={date} readOnly={readOnly} taskDates={taskDates} />
+            </Suspense>}
         </div>
       </div>}
 
@@ -460,15 +448,17 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
           ) : ''}
       </div>
 
-      <AddDataComponent
-        data={data}
-        handleChange={handleChange}
-        handleClose={handleClose}
-        readOnly={readOnly}
-        batchId={batchId}
-        readOnlyId={readOnlyId}
-        addPage={addPage}
-      />
+      <Suspense fallback={<PageLoader bootstrap />}>
+        <AddDataComponent
+          data={data}
+          handleChange={handleChange}
+          handleClose={handleClose}
+          readOnly={readOnly}
+          batchId={batchId}
+          readOnlyId={readOnlyId}
+          addPage={addPage}
+        />
+      </Suspense>
 
     </div>
   );

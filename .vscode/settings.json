@@ -28,6 +28,7 @@
     "[typescript]": {
       "editor.defaultFormatter": "vscode.typescript-language-features"
     },
+    "npm-scripts.showStartNotification": false,
     
   }
   
