@@ -2,12 +2,14 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-unused-vars */
 import Button from 'components/button';
+import PageLoader from 'components/loader';
 import { AUTH_STATUS } from 'config/app.config';
 import { ProjectData } from 'interface';
 import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
+import { memo, Suspense } from 'react';
 import Lottie from 'react-lottie';
 import ClipLoader from 'react-spinners/ClipLoader';
 
@@ -35,7 +37,7 @@ const ViewProject = ({ isDataFetched = false, readOnly = false, id, handleReadOn
             {(loading || status === AUTH_STATUS.LOADING) && !isDataFetched ?
                 <ClipLoader color='#ffffff' loading={loading} cssOverride={{ margin: '20px auto ', display: 'flex' }} size={30} />
                 : <div className='mt-2'>
-                    {projectData?.batches?.length > 0 ?
+                    {isDataFetched &&
                         projectData?.batches?.map((batch) =>
                             <div className='edit__data' key={batch._id}>
 
@@ -48,21 +50,25 @@ const ViewProject = ({ isDataFetched = false, readOnly = false, id, handleReadOn
                                 <div className='viewProject__container mt-1'>
                                     <div className='addPage p-0'>
                                         <div className='addPage__container p-0'>
-                                            <AddPageContainer readOnly={readOnly} batchId={batch._id} batch={batch} hideDate update projectId={projectData?._id.toString()} readOnlyId={readOnlyId} />
+                                            <Suspense fallback={<PageLoader bootstrap />}>
+                                                <AddPageContainer readOnly={readOnly} batchId={batch._id} batch={batch} hideDate update projectId={projectData?._id.toString()} readOnlyId={readOnlyId} />
+                                            </Suspense>
                                         </div>
                                     </div>
                                 </div>
 
                             </div>)
-                        : <Lottie options={{
-                            loop: true,
-                            autoplay: true,
-                            animationData: EmptyIcon
-                        }} height={300} width={300} />}
+                    }
+
+                    {false && <Lottie options={{
+                        loop: true,
+                        autoplay: true,
+                        animationData: EmptyIcon
+                    }} height={300} width={300} />}
 
                 </div>}
         </>
     );
 };
 
-export default ViewProject;
+export default memo(ViewProject);

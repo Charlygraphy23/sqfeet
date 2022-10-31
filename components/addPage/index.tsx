@@ -106,7 +106,7 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
   );
 
   const { isLoading: taskDateLoading, isFetched: taskDateLoaded } = useQuery(['data', projectId], fetchAllProject, {
-    enabled: !!projectId,
+    enabled: false,
   });
 
 

@@ -15,34 +15,15 @@ jobs:
       - uses: actions/checkout@v2
       #  add env file to .env.local
 
-      - name: Set Env Vars on Vercel Project
-        uses: dkershner6/vercel-set-env-action@v1
+      - name: Set Env Vars on Netlify Project
+        uses: netlify/actions/cli@master
         with:
-          token: ${{ secrets.VERCEL_TOKEN }}
-          projectName: sqfeet # project name in Vercel
-          envVariableKeys: DB_URL,CLIENT_ID,CLIENT_SECRET,AUTH_SECRET,NEXT_PUBLIC_BASE_URL
+            args: deploy --dir=site --functions=functions
         env:
           DB_URL: ${{ secrets.DB_URL }}
-          TARGET_DB_URL: production
-          TYPE_DB_URL: plain
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          TARGET_CLIENT_ID: production
-          TYPE_CLIENT_ID: plain
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-          TARGET_CLIENT_SECRET: production
-          TYPE_CLIENT_SECRET: plain
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
-          TARGET_AUTH_SECRET: production
-          TYPE_AUTH_SECRET: plain
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}          
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}        
           NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
-          TARGET_NEXT_PUBLIC_BASE_URL: production
-          TYPE_NEXT_PUBLIC_BASE_URL: plain
-      # deploy app to vercel
-      - name: deploy site to vercel
-        uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-          vercel-org-id: ${{ secrets.ORG_ID}} #Required
-          vercel-project-id: ${{ secrets.PROJECT_ID}} #Required
-          vercel-args: "--prod"
-          envVariableKeys: ""
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}

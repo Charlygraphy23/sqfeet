@@ -5,18 +5,18 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { toast } from 'components/alert';
 import Footer from 'components/footer';
+import PageLoader from 'components/loader';
+import ViewProject from 'components/viewProject';
 import { AUTH_STATUS } from 'config/app.config';
 import { Project, ProjectData } from 'interface';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
-import dynamic from 'next/dynamic';
-import useProjects, { getProject } from 'query/useProjects';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import useProject from 'query/useProject';
+import useProjects from 'query/useProjects';
+import { useCallback, useState } from 'react';
 
 
 
-const PageLoader = dynamic(() => import('components/loader'), { ssr: false, suspense: true });
-const ViewProject = dynamic(() => import('components/viewProject'), { ssr: false, suspense: true });
 
 
 
@@ -26,12 +26,13 @@ const ViewPage = () => {
     const [readOnly, setReadOnly] = useState(true);
     const [readOnlyId, setReadOnlyId] = useState('');
     const { status } = useSession();
-    const { isLoading: isDataLoading, data: projectData, isFetched: isDataFetched } = getProject({ status, id: selectedProject });
-    const { isLoading, data, isFetched, } = useProjects({ status });
-    const listOfProjects = useMemo(() => data?.data?.data as Project[] ?? [], [data]);
-    const _projectData = useMemo(() => projectData?.data?.data as ProjectData, [projectData]);
 
 
+    const project = useProject({ status, id: selectedProject });
+    const allProjects = useProjects({ status });
+
+
+    console.log(project);
 
     const handleReadOnly = useCallback((id: string) => {
 
@@ -43,9 +44,7 @@ const ViewPage = () => {
 
 
     if (status === AUTH_STATUS.LOADING)
-        return <Suspense fallback={<PageLoader bootstrap />}>
-            <PageLoader />
-        </Suspense>;
+        return <PageLoader />;
 
     return (
         <div className='viewProject'>
@@ -68,9 +67,9 @@ const ViewPage = () => {
                             <em>None</em>
                         </MenuItem>
 
-                        {isLoading && !isFetched && <PageLoader bootstrap />}
+                        {allProjects.isLoading && !allProjects.isFetched && <PageLoader bootstrap />}
 
-                        {!isLoading && isFetched && listOfProjects.length && listOfProjects?.map((val) => <MenuItem key={val?._id.toString()} value={val?._id.toString()}>{val?.name}</MenuItem>)}
+                        {!allProjects.isLoading && allProjects.isFetched && allProjects?.data?.data?.data.length && allProjects.data?.data?.data?.map((val: Project) => <MenuItem key={val?._id.toString()} value={val?._id.toString()}>{val?.name}</MenuItem>)}
 
 
                     </Select>
@@ -79,12 +78,12 @@ const ViewPage = () => {
 
 
 
-            <Suspense fallback={<PageLoader bootstrap />}>
-                {selectedProject && <ViewProject readOnly={readOnly} id={selectedProject} readOnlyId={readOnlyId} handleReadOnly={handleReadOnly} loading={isDataLoading} projectData={_projectData} isDataFetched={isDataFetched} />}
-            </Suspense>
+            <div>
+                <ViewProject readOnly={readOnly} id={selectedProject} readOnlyId={readOnlyId} handleReadOnly={handleReadOnly} loading={project.isLoading} projectData={project.data?.data?.data as ProjectData} isDataFetched={project.isFetched} />
+            </div>
 
             <Footer />
-        </div>
+        </div >
     );
 };
 

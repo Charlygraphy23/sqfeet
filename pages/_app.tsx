@@ -27,6 +27,14 @@ const MyApp = ({
 }: AppProps) => {
   const [queryClient] = useState(() => new QueryClient());
 
+  if (queryClient.isFetching()) {
+    console.warn('At least one query is fetching!');
+  }
+
+  if (queryClient.isMutating()) {
+    console.warn('At least one mutation is fetching!');
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
