@@ -5,7 +5,7 @@ import { ProjectData } from 'interface';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { getProject } from 'query/useProjects';
+import useProject from 'query/useProject';
 import { useCallback, useEffect, useState } from 'react';
 
 const PageLoader = dynamic(() => import('components/loader'), {
@@ -25,7 +25,7 @@ const ViewPageById = () => {
 
   const projectId = query?.projectid ? String(query?.projectid) : '';
 
-  const { isLoading, data, isFetched } = getProject({ id: projectId, status });
+  const { isLoading, data, isFetched } = useProject({ id: projectId, status });
 
   const handleReadOnly = useCallback((id: string) => {
     setReadOnly((prevState) => !prevState);
