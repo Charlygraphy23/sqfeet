@@ -36,6 +36,7 @@ const MyApp = ({
   }
 
   return (
+
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
         <Head>
@@ -53,6 +54,7 @@ const MyApp = ({
       </Hydrate>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
+
   );
 };
 

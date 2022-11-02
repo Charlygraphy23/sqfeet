@@ -8,8 +8,7 @@ import Footer from 'components/footer';
 import PageLoader from 'components/loader';
 import { AUTH_STATUS } from 'config/app.config';
 import { Project, ProjectData } from 'interface';
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { getSession, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import useProject from 'query/useProject';
 import useProjects from 'query/useProjects';
@@ -85,28 +84,5 @@ const ViewPage = () => {
     );
 };
 
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-
-
-    const session = await getSession({ req: context.req });
-
-    // ? if not authorized
-    if (!session) return {
-        props: {
-            data: []
-        },
-        redirect: {
-            destination: '/',
-            statusCode: '301'
-        }
-    };
-
-
-    return {
-        props: {
-
-        }
-    };
-};
 
 export default ViewPage;

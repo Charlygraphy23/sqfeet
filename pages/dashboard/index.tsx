@@ -52,6 +52,7 @@ const DashboardPage = ({ name }: Props) => {
 
     useEffect(() => {
 
+
         if (status === AUTH_STATUS.ERROR) {
             push('/');
             return;
