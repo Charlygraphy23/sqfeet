@@ -5,7 +5,6 @@ import { SelectChangeEvent } from '@mui/material';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'components/alert';
 import Button from 'components/button';
-import PageLoader from 'components/loader';
 import TextFields from 'components/textField';
 import {
   AREAS,
@@ -18,7 +17,7 @@ import EmptyIcon from 'lottie/empty.json';
 import moment from 'moment';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { ChangeEvent, memo, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import Lottie from 'react-lottie';
 import { ClockLoader, DotLoader } from 'react-spinners';
 import validator from 'validator';
@@ -38,14 +37,10 @@ type Props = {
 
 
 const Calender = dynamic(
-  () => import('../calender' /* webpackChunkName: "calender" */),
-  { ssr: false, suspense: true }
-);
+  () => import('../calender' /* webpackChunkName: "calender" */));
 
 const AddDataComponent = dynamic(
-  () => import('./components/AddDataComponent' /* webpackChunkName: "AddDataComponent" */),
-  { ssr: false, suspense: true }
-);
+  () => import('./components/AddDataComponent' /* webpackChunkName: "AddDataComponent" */));
 
 
 const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = false, update = false, projectId = '', readOnlyId = '', addPage = false }: Props) => {
@@ -106,7 +101,7 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
   );
 
   const { isLoading: taskDateLoading, isFetched: taskDateLoaded } = useQuery(['data', projectId], fetchAllProject, {
-    enabled: false,
+    enabled: !!projectId && !hideDate,
   });
 
 
@@ -375,9 +370,7 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
 
           {taskDateLoading && !taskDateLoaded
             ? <ClockLoader color='white' size={25} />
-            : <Suspense fallback={<PageLoader bootstrap />}>
-              <Calender setToday={setDate} today={date} readOnly={readOnly} taskDates={taskDates} />
-            </Suspense>}
+            : <Calender setToday={setDate} today={date} readOnly={readOnly} taskDates={taskDates} />}
         </div>
       </div>}
 
@@ -448,18 +441,15 @@ const AddPageContainer = ({ readOnly = false, batchId = '', batch, hideDate = fa
           ) : ''}
       </div>
 
-      <Suspense fallback={<PageLoader bootstrap />}>
-        <AddDataComponent
-          data={data}
-          handleChange={handleChange}
-          handleClose={handleClose}
-          readOnly={readOnly}
-          batchId={batchId}
-          readOnlyId={readOnlyId}
-          addPage={addPage}
-        />
-      </Suspense>
-
+      <AddDataComponent
+        data={data}
+        handleChange={handleChange}
+        handleClose={handleClose}
+        readOnly={readOnly}
+        batchId={batchId}
+        readOnlyId={readOnlyId}
+        addPage={addPage}
+      />
     </div>
   );
 };

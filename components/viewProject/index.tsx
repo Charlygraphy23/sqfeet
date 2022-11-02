@@ -25,7 +25,7 @@ type Props = {
     isDataFetched: boolean
 }
 
-const AddPageContainer = dynamic(() => import('components/addPage'), { ssr: false, suspense: true });
+const AddPageContainer = dynamic(() => import('components/addPage'), { suspense: true });
 
 
 const ViewProject = ({ isDataFetched = false, readOnly = false, id, handleReadOnly, loading, projectData, readOnlyId = '' }: Props) => {
@@ -60,7 +60,7 @@ const ViewProject = ({ isDataFetched = false, readOnly = false, id, handleReadOn
                             </div>)
                     }
 
-                    {false && <Lottie options={{
+                    {isDataFetched && !projectData?.batches && <Lottie options={{
                         loop: true,
                         autoplay: true,
                         animationData: EmptyIcon

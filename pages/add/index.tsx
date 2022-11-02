@@ -5,7 +5,7 @@ import { Project } from 'interface';
 import { getSession, useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { Suspense, useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
@@ -17,10 +17,7 @@ import useProjects from 'query/useProjects';
 
 
 
-const PageLoader = dynamic(() => import('../../components/loader'), {
-    ssr: true,
-    suspense: true,
-});
+const PageLoader = dynamic(() => import('../../components/loader'));
 
 
 
@@ -52,9 +49,7 @@ const AddProject = () => {
 
     if (status === AUTH_STATUS.LOADING)
         return (
-            <Suspense fallback={<PageLoader bootstrap />}>
-                <PageLoader />
-            </Suspense>
+            <PageLoader />
         );
 
     return (
