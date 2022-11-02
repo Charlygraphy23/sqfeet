@@ -6,17 +6,17 @@ import Select from '@mui/material/Select';
 import { toast } from 'components/alert';
 import Footer from 'components/footer';
 import PageLoader from 'components/loader';
-import ViewProject from 'components/viewProject';
 import { AUTH_STATUS } from 'config/app.config';
 import { Project, ProjectData } from 'interface';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
 import useProject from 'query/useProject';
 import useProjects from 'query/useProjects';
 import { useCallback, useState } from 'react';
 
 
-
+const ViewProject = dynamic(() => import('components/viewProject'));
 
 
 
@@ -31,8 +31,6 @@ const ViewPage = () => {
     const project = useProject({ status, id: selectedProject });
     const allProjects = useProjects({ status });
 
-
-    console.log(project);
 
     const handleReadOnly = useCallback((id: string) => {
 
