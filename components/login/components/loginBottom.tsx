@@ -9,7 +9,7 @@ const LoginBottomSection = () => {
 
 
 
-    const { status } = useSession({ required: true });
+    const { status } = useSession();
     const router = useRouter();
 
 
