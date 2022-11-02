@@ -39,7 +39,7 @@ const AddDataComponent = ({ data, handleChange, handleClose, readOnly = false, b
         <div className='addPage__container mt-1'>
             <div className='accordion '>
                 {data?.map((value, i) => (
-                    <Accordion key={i} className='mb-1'>
+                    <Accordion key={i} className='mb-1' TransitionProps={{ unmountOnExit: true }}>
                         <AccordionSummary
                             expandIcon={<ExpandMore />}
                             aria-controls='panel1a-content'
