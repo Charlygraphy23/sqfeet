@@ -3,6 +3,7 @@
 import { toast } from 'components/alert';
 import Button from 'components/button';
 import Footer from 'components/footer';
+import Profile from 'components/profile';
 import { AUTH_STATUS } from 'config/app.config';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { getSession, useSession } from 'next-auth/react';
@@ -64,6 +65,7 @@ const CreateProject = () => {
             <Button loaderColor='white' className='submit__button' value='Submit' onClick={handleProject} loading={loading} />
 
             <Footer />
+            <Profile />
         </div>
     );
 

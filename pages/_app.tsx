@@ -12,6 +12,8 @@ import Head from 'next/head';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 import { useState } from 'react';
+import { Provider } from 'react-redux';
+import Store from 'store';
 import '../styles/globals.scss';
 
 NProgress.configure({ showSpinner: false });
@@ -43,14 +45,16 @@ const MyApp = ({
           <meta charSet='utf-8' />
           <meta name='viewport' content='width=device-width, initial-scale=1' />
         </Head>
-        <SessionProvider session={session}>
-          <div className='app'>
-            <Layout>
-              <Component {...pageProps} />
-            </Layout>
-            <div className='app_toast' />
-          </div>
-        </SessionProvider>
+        <Provider store={Store}>
+          <SessionProvider session={session} >
+            <div className='app'>
+              <Layout>
+                <Component {...pageProps} />
+              </Layout>
+              <div className='app_toast' />
+            </div>
+          </SessionProvider>
+        </Provider>
       </Hydrate>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

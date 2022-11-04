@@ -6,6 +6,7 @@ import Select from '@mui/material/Select';
 import { toast } from 'components/alert';
 import Footer from 'components/footer';
 import PageLoader from 'components/loader';
+import Profile from 'components/profile';
 import { AUTH_STATUS } from 'config/app.config';
 import { Project, ProjectData } from 'interface';
 import { useSession } from 'next-auth/react';
@@ -80,6 +81,7 @@ const ViewPage = () => {
             </div>
 
             <Footer />
+            <Profile />
         </div >
     );
 };

@@ -5,6 +5,7 @@ import { DateRange } from '@mui/x-date-pickers-pro/DateRangePicker';
 import 'chart.js/auto';
 import { toast } from 'components/alert';
 import Footer from 'components/footer';
+import Profile from 'components/profile';
 import { AUTH_STATUS } from 'config/app.config';
 import dayjs, { Dayjs } from 'dayjs';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
@@ -162,6 +163,7 @@ const DashboardPage = ({ name }: Props) => {
                 </div>
             </div>
             <Footer />
+            <Profile />
         </section>
     );
 };

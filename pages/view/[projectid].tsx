@@ -1,4 +1,5 @@
 import Footer from 'components/footer';
+import Profile from 'components/profile';
 import ViewProject from 'components/viewProject';
 import { AUTH_STATUS } from 'config/app.config';
 import { ProjectData } from 'interface';
@@ -60,6 +61,7 @@ const ViewPageById = () => {
         readOnlyId={readOnlyId}
       />
       <Footer />
+      <Profile />
     </div>
   );
 };

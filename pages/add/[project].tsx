@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import Footer from 'components/footer';
+import Profile from 'components/profile';
 import { AUTH_STATUS } from 'config/app.config';
 import { useSession } from 'next-auth/react';
 import dynamic from 'next/dynamic';
@@ -33,6 +34,7 @@ const AddPage = () => {
                 <AddPageContainer projectId={id ?? ''} addPage />
             </Suspense>
             <Footer />
+            <Profile />
         </div>
     );
 };

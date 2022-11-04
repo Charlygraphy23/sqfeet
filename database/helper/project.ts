@@ -19,6 +19,7 @@ export const getAllProjectsByUser = async ({ req }: GetAllProjectsByUser) => {
     await DB.connect().catch((err: any) => {
       throw { message: err?.message, status: 500, err };
     });
+
     // @ts-expect-error
     const userFound = await UserModel._findByGoogleId(user?.userId);
 

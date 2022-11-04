@@ -12,6 +12,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Footer from 'components/footer';
+import Profile from 'components/profile';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import useProjects from 'query/useProjects';
 
@@ -91,6 +92,7 @@ const AddProject = () => {
             </div>
 
             <Footer />
+            <Profile />
         </div>
     );
 };
