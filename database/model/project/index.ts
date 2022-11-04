@@ -23,7 +23,7 @@ const schema = new mongoose.Schema(
         return this.find();
       },
       _findByUser(_id: mongoose.Types.ObjectId) {
-        return this.find({ createdby: _id });
+        return this.find({ createdBy: _id });
       },
       _findByName(name: string, id: mongoose.Types.ObjectId) {
         return this.find(
